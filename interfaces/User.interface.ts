@@ -4,7 +4,7 @@ interface User {
   personalName?: string;
   mail?: string;
   password: string;
-  passwordConfirm?: string;
+  confirmPassword?: string;
   expertizeTech?: string;
   interestedTech?: string;
   description?: string;
