@@ -74,3 +74,22 @@ All notable changes to this project will be documented in this file
 -   No fixes.
 
 ---
+
+## [0.3.1] - 2022-03-20
+
+### Added
+
+-   CRUD operations related code moved to a new file.
+-   Code duplication reduced.
+
+### Removed
+
+-   Nothing removed
+
+### Changed
+
+-   No changes
+
+### Fixed
+
+-   No fixed

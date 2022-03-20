@@ -3,6 +3,7 @@ import { Request, Response } from 'express';
 import httpCode from '../utils/httpcodes';
 import Expert from '../interfaces/Expert.interface';
 import UserModel from '../models/User.model';
+import DatabaseOperations from '../utils/dbOperations';
 
 class ExpertController {
 	/**
@@ -37,13 +38,7 @@ class ExpertController {
 		try {
 			const id: string = req.params.id;
 
-			UserModel.findById(id)
-				.then((result) => {
-					return res.status(httpCode.ACCEPTED).json(result);
-				})
-				.catch((error) => {
-					return res.status(httpCode.BAD_REQUEST).json(error);
-				});
+			DatabaseOperations.getOne(UserModel, { id }, res);
 		} catch (error) {
 			return res.status(httpCode.INTERNAL_SERVER_ERROR).json(error);
 		}

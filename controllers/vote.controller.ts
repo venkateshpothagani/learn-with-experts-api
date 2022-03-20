@@ -3,6 +3,7 @@ import { Request, Response } from 'express';
 import httpCode from '../utils/httpcodes';
 import Vote, { VoteCounter } from '../interfaces/Vote.interface';
 import VoteModel from '../models/Vote.model';
+import DatabaseOperations from '../utils/dbOperations';
 
 class VoteController {
 	/**
@@ -15,13 +16,7 @@ class VoteController {
 		try {
 			const body: Vote = { ...req.body };
 
-			VoteModel.create({ ...body })
-				.then((result) => {
-					return res.status(httpCode.ACCEPTED).json(result);
-				})
-				.catch((error) => {
-					return res.status(httpCode.BAD_REQUEST).json(error);
-				});
+			DatabaseOperations.create(VoteModel, body, res);
 		} catch (error) {
 			return res.status(httpCode.INTERNAL_SERVER_ERROR).json(error);
 		}

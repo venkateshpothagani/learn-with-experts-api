@@ -3,6 +3,7 @@ import { Request, Response } from 'express';
 import httpCode from '../utils/httpcodes';
 import Post from '../interfaces/Post.interface';
 import PostModel from '../models/Post.model';
+import DatabaseOperations from '../utils/dbOperations';
 
 class PostController {
 	/**
@@ -15,13 +16,7 @@ class PostController {
 		try {
 			const body: Post = { ...req.body };
 
-			PostModel.create(body)
-				.then((result: Post) => {
-					return res.status(httpCode.CREATED).json(result);
-				})
-				.catch((error) => {
-					return res.status(httpCode.BAD_REQUEST).json(error);
-				});
+			DatabaseOperations.create(PostModel, body, res);
 		} catch (error) {
 			return res.status(httpCode.INTERNAL_SERVER_ERROR).json(error);
 		}
@@ -37,13 +32,7 @@ class PostController {
 		try {
 			const body: { id: string } = req.body;
 
-			PostModel.deleteOne({ id: body.id })
-				.then((result) => {
-					return res.status(httpCode.ACCEPTED).json(result);
-				})
-				.catch((error) => {
-					return res.status(httpCode.BAD_REQUEST).json(error);
-				});
+			DatabaseOperations.delete(PostModel, body, res);
 		} catch (error) {
 			return res.status(httpCode.INTERNAL_SERVER_ERROR).json(error);
 		}
@@ -81,13 +70,7 @@ class PostController {
 		try {
 			const body: { id: string } = req.body;
 
-			PostModel.findById(body.id)
-				.then((result) => {
-					return res.status(httpCode.ACCEPTED).json(result);
-				})
-				.catch((error) => {
-					return res.status(httpCode.BAD_REQUEST).json(error);
-				});
+			DatabaseOperations.getOne(PostModel, body, res);
 		} catch (error) {
 			return res.status(httpCode.INTERNAL_SERVER_ERROR).json(error);
 		}
@@ -103,13 +86,7 @@ class PostController {
 		try {
 			const body: { id: string; post: Post } = { ...req.body };
 
-			PostModel.updateOne({ id: body.id }, { ...body.post })
-				.then((result) => {
-					return res.status(httpCode.ACCEPTED).json(result);
-				})
-				.catch((error) => {
-					return res.status(httpCode.BAD_REQUEST).json(error);
-				});
+			DatabaseOperations.update(PostModel, { id: body.id }, { ...body.post }, res);
 		} catch (error) {
 			return res.status(httpCode.INTERNAL_SERVER_ERROR).json(error);
 		}

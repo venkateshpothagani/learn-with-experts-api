@@ -3,6 +3,7 @@ import { Request, Response } from 'express';
 import httpCode from '../utils/httpcodes';
 import Comment from '../interfaces/Comment.interface';
 import CommentModel from '../models/Comment.model';
+import DatabaseOperations from '../utils/dbOperations';
 
 class CommentController {
 	/**
@@ -15,13 +16,7 @@ class CommentController {
 		try {
 			const body: Comment = { ...req.body };
 
-			CommentModel.create(body)
-				.then((result: Comment) => {
-					return res.status(httpCode.CREATED).json(result);
-				})
-				.catch((error) => {
-					return res.status(httpCode.BAD_REQUEST).json(error);
-				});
+			DatabaseOperations.create(CommentModel, body, res);
 		} catch (error) {
 			return res.status(httpCode.INTERNAL_SERVER_ERROR).json(error);
 		}
@@ -37,13 +32,7 @@ class CommentController {
 		try {
 			const body: { id: string } = req.body;
 
-			CommentModel.deleteOne({ id: body.id })
-				.then((result) => {
-					return res.status(httpCode.ACCEPTED).json(result);
-				})
-				.catch((error) => {
-					return res.status(httpCode.BAD_REQUEST).json(error);
-				});
+			DatabaseOperations.delete(CommentModel, body, res);
 		} catch (error) {
 			return res.status(httpCode.INTERNAL_SERVER_ERROR).json(error);
 		}
@@ -81,13 +70,7 @@ class CommentController {
 		try {
 			const body: { id: string } = req.body;
 
-			CommentModel.findById(body.id)
-				.then((result) => {
-					return res.status(httpCode.ACCEPTED).json(result);
-				})
-				.catch((error) => {
-					return res.status(httpCode.BAD_REQUEST).json(error);
-				});
+			DatabaseOperations.getOne(CommentModel, body, res);
 		} catch (error) {
 			return res.status(httpCode.INTERNAL_SERVER_ERROR).json(error);
 		}
@@ -103,13 +86,7 @@ class CommentController {
 		try {
 			const body: { id: string; post: Comment } = { ...req.body };
 
-			CommentModel.updateOne({ id: body.id }, { ...body.post })
-				.then((result) => {
-					return res.status(httpCode.ACCEPTED).json(result);
-				})
-				.catch((error) => {
-					return res.status(httpCode.BAD_REQUEST).json(error);
-				});
+			DatabaseOperations.update(CommentModel, { id: body.id }, { ...body.post }, res);
 		} catch (error) {
 			return res.status(httpCode.INTERNAL_SERVER_ERROR).json(error);
 		}
