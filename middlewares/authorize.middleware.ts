@@ -26,21 +26,18 @@ const authorize = (req: any, res: any, next: any) => {
 		const authHeader = req.headers['authorization'];
 		const token = authHeader && authHeader.split(' ')[1];
 
-		if (token == null)
-			return res.sendStatus(httpCode.UNAUTHORIZED).json({ message: 'No token, authorization denied' });
+		if (token == null) return res.status(httpCode.UNAUTHORIZED).json({ message: 'Access token required.' });
 
 		jwt.verifyToken(token, config.auth.JWT_SECRET_KEY, (error: any, decoded: any) => {
 			if (error) {
-				return res.sendStatus(httpCode.UNAUTHORIZED).json({ error: error, message: 'Bad token' });
+				return res.status(httpCode.UNAUTHORIZED).json(error);
 			} else {
 				req.body.username = decoded.username;
-				// next();
+				next();
 			}
 		});
 	} catch (error) {
-		res.sendStatus(httpCode.INTERNAL_SERVER_ERROR).json(error, {
-			message: 'Unexpected error while authorizing user',
-		});
+		return res.status(httpCode.INTERNAL_SERVER_ERROR).json(error);
 	}
 };
 
