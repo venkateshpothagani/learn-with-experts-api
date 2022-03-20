@@ -123,9 +123,13 @@ class Authenticator {
 						RefreshTokenModel.deleteOne({
 							username: decoded.username,
 							refreshToken: body.refreshToken,
-						}).then((response) => {
-							return res.status(httpCode.OK).json(response);
-						});
+						})
+							.then((result) => {
+								return res.status(httpCode.OK).json(result);
+							})
+							.catch((error) => {
+								return res.status(httpCode.BAD_REQUEST).json(error);
+							});
 					}
 				);
 			}

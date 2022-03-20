@@ -14,4 +14,4 @@ const RefreshTokenSchema: Schema<Token> = new Schema({
 	},
 });
 
-export default model('RefreshTokenSchema', RefreshTokenSchema);
+export default model('RefreshToken', RefreshTokenSchema);

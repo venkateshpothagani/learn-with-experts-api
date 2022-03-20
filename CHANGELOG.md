@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file
 
 ## [Unreleased]
 
-## [1.0.0] - 2022-03-16
+## [0.1.0] - 2022-03-16
 
 ### Added
 
@@ -25,7 +25,7 @@ All notable changes to this project will be documented in this file
 
 ---
 
-## [1.1.0] - 2022-03-19
+## [0.2.0] - 2022-03-19
 
 ### Added
 
@@ -48,5 +48,29 @@ All notable changes to this project will be documented in this file
 ### Fixed
 
 -   No fixes
+
+---
+
+## [0.3.0] - 2022-03-20
+
+### Added
+
+-   post, comment, vote and experts related route's basic functionality completed.
+-   id column (stores uuid) added in all models.
+
+### Removed
+
+-   QA routes files removed.
+
+### Changed
+
+-   scripts changed in package.json.
+-   Minor changes in logout method in Auth. controller.
+-   Reply changed to comment.
+-   Versions in CHANGELOG
+
+### Fixed
+
+-   No fixes.
 
 ---
