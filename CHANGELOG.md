@@ -93,3 +93,21 @@ All notable changes to this project will be documented in this file
 ### Fixed
 
 -   No fixed
+
+## [0.3.2] - 2022-03-21
+
+### Added
+
+-   Auth. end points info added in README.md file.
+
+### Removed
+
+-   Password strength check removed for signup.
+
+### Changed
+
+-   Minor changes in index.ts and few routes controllers.
+
+### Fixed
+
+-   import error for experts and vote controllers (added export statement)

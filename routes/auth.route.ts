@@ -9,6 +9,6 @@ router.post('/login', auth.login);
 
 router.post('/logout', authorize, auth.logout);
 
-router.post('/refresh', authorize, auth.refresh);
+router.post('/refresh', auth.refresh);
 
 export default router;

@@ -20,9 +20,9 @@ class Authenticator {
 			const body: User = req.body;
 
 			// Check password pattern
-			const pattern = new RegExp(config.auth.PASSWORD_PATTERN);
-			if (!pattern.test(body.password))
-				return res.status(httpCode.BAD_REQUEST).json({ message: "Passwords doesn't requirements" });
+			// const pattern = new RegExp(config.auth.PASSWORD_PATTERN);
+			// if (!pattern.test(body.password))
+			// 	return res.status(httpCode.BAD_REQUEST).json({ message: "Passwords doesn't requirements" });
 
 			if (!(body.password === body.confirmPassword))
 				// Password comparison

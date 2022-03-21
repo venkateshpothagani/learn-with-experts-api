@@ -4,3 +4,5 @@ import authorize from '../middlewares/authorize.middleware';
 
 router.get('/expert', expert.getFeed);
 router.get('/expert/:id', authorize, expert.getOne);
+
+export default router
