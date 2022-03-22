@@ -111,3 +111,9 @@ All notable changes to this project will be documented in this file
 ### Fixed
 
 -   import error for experts and vote controllers (added export statement)
+
+## [0.3.3] - 2022-03-21
+
+### Fixed
+
+-   Temporary fix for logout. Used mongodb instead of redis cache.

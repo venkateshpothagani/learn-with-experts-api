@@ -65,6 +65,14 @@ class Authenticator {
 							const accessToken = jwt.accessTokenGenerator(response.username);
 							const refreshToken = jwt.refreshTokenGenerator(response.username);
 
+							// Save access token to check to whether client is logged out or not.
+							RefreshTokenModel.create({
+								username: 'temp ' + response.username,
+								refreshToken: accessToken,
+							}).catch((error) => {
+								return res.status(httpCode.INTERNAL_SERVER_ERROR).json(error);
+							});
+
 							// Save refresh token in database
 							RefreshTokenModel.create({ username: response.username, refreshToken }, (error, token) => {
 								if (error) return res.status(httpCode.INTERNAL_SERVER_ERROR).json(error);
@@ -112,6 +120,10 @@ class Authenticator {
 	static logout = async (req: Request, res: Response) => {
 		try {
 			const body: { refreshToken: string } = req.body;
+
+			const authHeader = req.headers['authorization'];
+			const accessToken = authHeader && authHeader.split(' ')[1];
+
 			if (!body.refreshToken) {
 				return res.status(httpCode.UNAUTHORIZED).json({ message: 'No refresh token' });
 			} else {
@@ -120,6 +132,14 @@ class Authenticator {
 					config.auth.JWT_REFRESH_SECRET_KEY,
 					(error: any, decoded: any) => {
 						if (error) return res.status(httpCode.UNAUTHORIZED).json(error);
+
+						RefreshTokenModel.deleteOne({
+							username: 'temp ' + decoded.username,
+							refreshToken: accessToken,
+						}).catch((error) => {
+							return res.status(httpCode.BAD_REQUEST).json(error);
+						});
+
 						RefreshTokenModel.deleteOne({
 							username: decoded.username,
 							refreshToken: body.refreshToken,

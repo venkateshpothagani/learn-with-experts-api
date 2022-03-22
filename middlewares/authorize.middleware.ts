@@ -1,6 +1,7 @@
 import httpCode from '../utils/httpcodes';
 import config from '../config/app.config';
 import jwt from '../utils/jwt';
+import RefreshTokenModel from '../models/RefreshToken.model';
 
 /**
  *
@@ -32,6 +33,17 @@ const authorize = (req: any, res: any, next: any) => {
 			if (error) {
 				return res.status(httpCode.UNAUTHORIZED).json(error);
 			} else {
+				RefreshTokenModel.findOne({ username: 'temp ' + decoded.username, refreshToken: token })
+					.then((result) => {
+						console.log(result);
+
+						if (!result) {
+							return res.status(httpCode.UNAUTHORIZED).json(error);
+						}
+					})
+					.catch((error) => {
+						return res.status(httpCode.INTERNAL_SERVER_ERROR).json(error);
+					});
 				req.body.username = decoded.username;
 				next();
 			}
