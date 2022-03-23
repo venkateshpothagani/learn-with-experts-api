@@ -1,12 +1,12 @@
+import { Schema } from 'mongoose';
+
 interface Comment {
-	id: string;
-	userId: string;
-	parentId: string;
+	id?: Schema.Types.ObjectId;
+	userId: Schema.Types.ObjectId;
+	parentId: Schema.Types.ObjectId;
 	type: 'answer' | 'comment' | 'reply';
 	description: string;
-	upvoteCount?: number;
-	downvoteCount?: number;
-	timestamp: number;
+	timestamp: Schema.Types.Date;
 }
 
 export default Comment;

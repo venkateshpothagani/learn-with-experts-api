@@ -1,8 +1,10 @@
+import { Schema } from 'mongoose';
+
 interface Vote {
-	id: string;
-	parentId: string;
+	id?: Schema.Types.ObjectId;
+	parentId: Schema.Types.ObjectId;
 	type: 'upvote' | 'downvote';
-	timestamp: number;
+	timestamp: Schema.Types.Date;
 }
 export interface VoteCounter {
 	upvotes: number;

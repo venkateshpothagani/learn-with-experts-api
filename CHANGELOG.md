@@ -117,3 +117,9 @@ All notable changes to this project will be documented in this file
 ### Fixed
 
 -   Temporary fix for logout. Used mongodb instead of redis cache.
+
+## [0.3.4] - 2022-03-24
+
+### Changed
+
+-   Few changes done to models to create relationship (One to Many Relationship).

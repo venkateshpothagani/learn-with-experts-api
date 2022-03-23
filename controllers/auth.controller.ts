@@ -35,7 +35,7 @@ class Authenticator {
 			// Create new user in database
 			UserModel.create(user, (error, user) => {
 				if (error) return res.status(httpCode.BAD_REQUEST).json(error);
-				return res.status(httpCode.CREATED).json(user);
+				return res.status(httpCode.CREATED).json({ id: user.id, username: user.username });
 			});
 		} catch (error) {
 			return res.status(httpCode.INTERNAL_SERVER_ERROR).json(error);

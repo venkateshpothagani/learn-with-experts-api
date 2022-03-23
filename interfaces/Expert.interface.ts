@@ -1,5 +1,7 @@
+import { Schema } from 'mongoose';
+
 interface Expert {
-	id: string;
+	id?: Schema.Types.ObjectId;
 	username: string;
 	personalName: string;
 	mail: string;
