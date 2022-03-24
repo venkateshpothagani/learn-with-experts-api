@@ -1,6 +1,9 @@
-import router from '../utils/router';
+import { Router } from 'express';
+
 import authorize from '../middlewares/authorize.middleware';
 import post from '../controllers/post.controller';
+
+const router = Router();
 
 router.get('/', post.getFeed);
 router.get('/:id', post.getOne);

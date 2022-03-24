@@ -5,8 +5,9 @@ import httpCode from '../utils/httpcodes';
 import UserModel from '../models/User.model';
 import RefreshTokenModel from '../models/RefreshToken.model';
 import bycrypt from '../utils/bycrypt';
-import jwt from '../utils/jwt';
+import jwt from 'jsonwebtoken';
 import config from '../config/app.config';
+import DatabaseOperations from '../utils/dbOperations';
 
 class Authenticator {
 	/**
@@ -19,24 +20,30 @@ class Authenticator {
 		try {
 			const body: User = req.body;
 
-			// Check password pattern
-			// const pattern = new RegExp(config.auth.PASSWORD_PATTERN);
-			// if (!pattern.test(body.password))
-			// 	return res.status(httpCode.BAD_REQUEST).json({ message: "Passwords doesn't requirements" });
+			const pattern = new RegExp(config.auth.PASSWORD_PATTERN);
 
+			// Check password pattern
+			if (!pattern.test(body.password))
+				return res.status(httpCode.BAD_REQUEST).json({ message: "Passwords doesn't requirements" });
+
+			// Password comparison
 			if (!(body.password === body.confirmPassword))
-				// Password comparison
 				return res.status(httpCode.BAD_REQUEST).json({ message: 'Passwords are not matched' });
 
 			// Password encryption
 			const passwordHash = await bycrypt.encryptPassword(body.password);
 			const user: User = { ...body, password: passwordHash };
 
-			// Create new user in database
-			UserModel.create(user, (error, user) => {
-				if (error) return res.status(httpCode.BAD_REQUEST).json(error);
-				return res.status(httpCode.CREATED).json({ id: user.id, username: user.username });
-			});
+			// Save new user in database
+			UserModel.create(user)
+				.then((result) => {
+					return res
+						.status(httpCode.CREATED)
+						.json({ id: result.id, username: result.username, fullName: result.fullName });
+				})
+				.catch((error) => {
+					return res.status(httpCode.BAD_REQUEST).json(error);
+				});
 		} catch (error) {
 			return res.status(httpCode.INTERNAL_SERVER_ERROR).json(error);
 		}
@@ -46,7 +53,7 @@ class Authenticator {
 	 *
 	 * @param req express.Request
 	 * @param res express.Response
-	 * @description Authenticates user and returns jwt token for successful authentication
+	 * @description Authenticates user and returns jwttemp token for successful authentication
 	 */
 	static login = async (req: Request, res: Response) => {
 		try {
@@ -60,10 +67,16 @@ class Authenticator {
 					// Compare passwords
 					bycrypt.comparePassword(body.password, response.password).then((result) => {
 						if (!result) {
-							return res.status(httpCode.BAD_REQUEST).json({ message: 'Invalid password' });
+							return res.status(httpCode.BAD_REQUEST).json({ message: 'Wrong password' });
 						} else {
-							const accessToken = jwt.accessTokenGenerator(response.username);
-							const refreshToken = jwt.refreshTokenGenerator(response.username);
+							const accessToken = jwt.sign({ username: body.username }, config.auth.JWT_SECRET_KEY, {
+								expiresIn: config.auth.JWT_EXPIRES_IN,
+							});
+
+							const refreshToken = jwt.sign(
+								{ username: body.username },
+								config.auth.JWT_REFRESH_SECRET_KEY
+							);
 
 							// Save access token to check to whether client is logged out or not.
 							RefreshTokenModel.create({
@@ -74,14 +87,52 @@ class Authenticator {
 							});
 
 							// Save refresh token in database
-							RefreshTokenModel.create({ username: response.username, refreshToken }, (error, token) => {
-								if (error) return res.status(httpCode.INTERNAL_SERVER_ERROR).json(error);
-								return res.status(httpCode.OK).json({ accessToken, refreshToken: token.refreshToken });
-							});
+							RefreshTokenModel.create({ username: response.username, refreshToken })
+								.then((result) => {
+									return res
+										.status(httpCode.OK)
+										.json({ accessToken, refreshToken: result.refreshToken });
+								})
+								.catch((error) => {
+									return res.status(httpCode.INTERNAL_SERVER_ERROR).json(error);
+								});
 						}
 					});
 				}
 			});
+		} catch (error) {
+			return res.status(httpCode.INTERNAL_SERVER_ERROR).json(error);
+		}
+	};
+
+	/**
+	 *
+	 * @param req express.Request
+	 * @param res express.Response
+	 * @returns
+	 */
+	static update = async (req: Request, res: Response) => {
+		try {
+			const id: string = req.body.id;
+			const data = { ...req.body.data };
+
+			DatabaseOperations.update(UserModel, { id }, data, res);
+		} catch (error) {
+			return res.status(httpCode.INTERNAL_SERVER_ERROR).json(error);
+		}
+	};
+
+	/**
+	 *
+	 * @param req express.Request
+	 * @param res express.Response
+	 * @returns
+	 */
+	static remove = async (req: Request, res: Response) => {
+		try {
+			const id: string = req.body.id;
+
+			DatabaseOperations.delete(UserModel, { id }, res);
 		} catch (error) {
 			return res.status(httpCode.INTERNAL_SERVER_ERROR).json(error);
 		}
@@ -99,11 +150,13 @@ class Authenticator {
 			if (!body.refreshToken) {
 				return res.status(httpCode.FORBIDDEN).json({ message: 'No refresh token' });
 			}
-			jwt.verifyToken(body.refreshToken, config.auth.JWT_REFRESH_SECRET_KEY, (error: any, decoded: any) => {
+			jwt.verify(body.refreshToken, config.auth.JWT_REFRESH_SECRET_KEY, (error: any, decoded: any) => {
 				if (error) {
 					return res.status(httpCode.UNAUTHORIZED).json(error);
 				}
-				const accessToken = jwt.accessTokenGenerator(decoded.username);
+				const accessToken = jwt.sign({ username: decoded.username }, config.auth.JWT_SECRET_KEY, {
+					expiresIn: config.auth.JWT_EXPIRES_IN,
+				});
 				return res.status(httpCode.OK).json({ accessToken });
 			});
 		} catch (error) {
@@ -127,31 +180,27 @@ class Authenticator {
 			if (!body.refreshToken) {
 				return res.status(httpCode.UNAUTHORIZED).json({ message: 'No refresh token' });
 			} else {
-				return jwt.verifyToken(
-					body.refreshToken,
-					config.auth.JWT_REFRESH_SECRET_KEY,
-					(error: any, decoded: any) => {
-						if (error) return res.status(httpCode.UNAUTHORIZED).json(error);
+				jwt.verify(body.refreshToken, config.auth.JWT_REFRESH_SECRET_KEY, (error: any, decoded: any) => {
+					if (error) return res.status(httpCode.UNAUTHORIZED).json(error);
 
-						RefreshTokenModel.deleteOne({
-							username: 'temp ' + decoded.username,
-							refreshToken: accessToken,
-						}).catch((error) => {
+					RefreshTokenModel.deleteOne({
+						username: 'temp ' + decoded.username,
+						refreshToken: accessToken,
+					}).catch((error) => {
+						return res.status(httpCode.BAD_REQUEST).json(error);
+					});
+
+					RefreshTokenModel.deleteOne({
+						username: decoded.username,
+						refreshToken: body.refreshToken,
+					})
+						.then((result) => {
+							return res.status(httpCode.OK).json(result);
+						})
+						.catch((error) => {
 							return res.status(httpCode.BAD_REQUEST).json(error);
 						});
-
-						RefreshTokenModel.deleteOne({
-							username: decoded.username,
-							refreshToken: body.refreshToken,
-						})
-							.then((result) => {
-								return res.status(httpCode.OK).json(result);
-							})
-							.catch((error) => {
-								return res.status(httpCode.BAD_REQUEST).json(error);
-							});
-					}
-				);
+				});
 			}
 		} catch (error) {
 			return res.status(httpCode.INTERNAL_SERVER_ERROR).json(error);

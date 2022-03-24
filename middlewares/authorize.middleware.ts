@@ -35,7 +35,6 @@ const authorize = (req: any, res: any, next: any) => {
 			} else {
 				RefreshTokenModel.findOne({ username: 'temp ' + decoded.username, refreshToken: token })
 					.then((result) => {
-						console.log(result);
 
 						if (!result) {
 							return res.status(httpCode.UNAUTHORIZED).json(error);

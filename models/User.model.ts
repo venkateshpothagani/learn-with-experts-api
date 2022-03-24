@@ -14,7 +14,7 @@ const UserSchema: Schema<User> = new Schema({
 		required: true,
 		minlength: 6,
 	},
-	personalName: { type: String, required: false, minlength: 3, maxlength: 30 },
+	fullName: { type: String, required: false, minlength: 3, maxlength: 30 },
 	mail: {
 		type: String,
 		required: false,

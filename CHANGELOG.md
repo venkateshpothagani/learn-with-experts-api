@@ -123,3 +123,13 @@ All notable changes to this project will be documented in this file
 ### Changed
 
 -   Few changes done to models to create relationship (One to Many Relationship).
+
+## [0.4.4] - 2022-03-24
+
+### Added
+
+-   Ed points to update and delete user.
+
+### Fixed
+
+-   Few bug fixes including routing mapping and password pattern checking.

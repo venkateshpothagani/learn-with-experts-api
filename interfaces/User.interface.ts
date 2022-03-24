@@ -3,7 +3,7 @@ import { Schema } from 'mongoose';
 interface User {
 	id?: Schema.Types.ObjectId;
 	username: string;
-	personalName?: string;
+	fullName?: string;
 	mail?: string;
 	password: string;
 	confirmPassword?: string;

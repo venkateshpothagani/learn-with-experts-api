@@ -1,8 +1,10 @@
-import router from '../utils/router';
+import { Router } from "express";
+
+const router = Router();
 import expert from '../controllers/expert.controller';
 import authorize from '../middlewares/authorize.middleware';
 
-router.get('/expert', expert.getFeed);
-router.get('/expert/:id', authorize, expert.getOne);
+router.get('/', expert.getFeed);
+router.get('/:id', authorize, expert.getOne);
 
 export default router

@@ -1,4 +1,6 @@
-import router from '../utils/router';
+import { Router } from "express";
+
+const router = Router();
 import authorize from '../middlewares/authorize.middleware';
 import comment from '../controllers/comment.controller';
 
