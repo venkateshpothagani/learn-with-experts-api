@@ -25,7 +25,7 @@ app.use('/api/expert', expertRoutes);
 app.use('/api/vote', voteRoutes);
 
 app.listen(config.app.PORT, () => {
-	console.log(`App listening on port ${config.app.PORT}`);
+	console.log(`\n===========App listening on port ${config.app.PORT}===========\n`);
 });
 
 export default app;

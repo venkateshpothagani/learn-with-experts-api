@@ -1,5 +1,6 @@
-import jwt from 'jsonwebtoken';
+import jwt, { JwtPayload } from 'jsonwebtoken';
 import config from '../config/app.config';
+import { CustomJwtPayload } from '../interfaces/JWTInterfaces';
 
 class JWT {
 	/**
@@ -9,7 +10,7 @@ class JWT {
 	 * @description Function generates JWT token for user
 	 *
 	 */
-	static accessTokenGenerator(username: string) {
+	static getAccessToken(username: string) {
 		return jwt.sign({ username }, config.auth.JWT_SECRET_KEY, { expiresIn: config.auth.JWT_EXPIRES_IN });
 	}
 
@@ -20,22 +21,29 @@ class JWT {
 	 * @description Function generates JWT refresh token for user
 	 *
 	 */
-	static refreshTokenGenerator(username: string) {
-		return jwt.sign({ username }, config.auth.JWT_REFRESH_SECRET_KEY);
+	static getRefreshToken(username: string) {
+		return jwt.sign({ username }, config.auth.JWT_REFRESH_SECRET_KEY, {
+			expiresIn: config.auth.JWT_REFRESH_EXPIRES_IN,
+		});
 	}
 
 	/**
 	 *
 	 * @param token string
 	 * @param secret string
-	 * @param options any
-	 * @param callback Function
-	 * @returns data JwtPayload
+	 * @returns  Promise< CustomJwtPayload >
 	 * @description	Function verifies JWT token
 	 */
-	static verifyToken(token: string, secret: string, callback: any): void | jwt.JwtPayload | string {
-		return jwt.verify(token, secret, callback);
-	}
+	static verifyToken = (token: string, secret: string) => {
+		return new Promise<CustomJwtPayload>((resolve, reject) => {
+			jwt.verify(token, secret, (error: jwt.VerifyErrors | null, decoded: any) => {
+				if (error) {
+					return reject(error);
+				}
+				return resolve(decoded);
+			});
+		});
+	};
 }
 
 export default JWT;

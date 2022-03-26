@@ -1,7 +1,7 @@
 import httpCode from '../utils/httpcodes';
 import config from '../config/app.config';
 import jwt from '../utils/jwt';
-import RefreshTokenModel from '../models/RefreshToken.model';
+import redis from '../utils/redis';
 
 /**
  *
@@ -10,45 +10,42 @@ import RefreshTokenModel from '../models/RefreshToken.model';
  * @param next express.NextFunction
  * @returns abstract
  * @description Function checks if user is authorized to access the route
- *
- * This function is a middleware for checking JWT token in routes where authorization is required
- *
- * If token is valid, it will be decoded and stored in req.username
- *
- * If token is invalid, it will be returned with error message and status code `403`
- *
- * If token is not provided, it will be returned with error message and status code `401`
- *
- * If token is expired, it will be returned with error message and status code `403`
- *
+ * 1. Token is null or not
+ * 2. Validate token
+ * 3. Compare with server stored token
  */
 const authorize = (req: any, res: any, next: any) => {
 	try {
+		//Get token from user request
 		const authHeader = req.headers['authorization'];
 		const token = authHeader && authHeader.split(' ')[1];
 
-		if (token == null) return res.status(httpCode.UNAUTHORIZED).json({ message: 'Access token required.' });
+		if (token == null)
+			return res.status(httpCode.UNAUTHORIZED).json({
+				error: {
+					message: 'Access Token required to validate client',
+					details: null,
+				},
+			});
 
-		jwt.verifyToken(token, config.auth.JWT_SECRET_KEY, (error: any, decoded: any) => {
-			if (error) {
-				return res.status(httpCode.UNAUTHORIZED).json(error);
-			} else {
-				RefreshTokenModel.findOne({ username: 'temp ' + decoded.username, refreshToken: token })
-					.then((result) => {
-
-						if (!result) {
-							return res.status(httpCode.UNAUTHORIZED).json(error);
-						}
-					})
-					.catch((error) => {
-						return res.status(httpCode.INTERNAL_SERVER_ERROR).json(error);
-					});
-				req.body.username = decoded.username;
-				next();
+		//Validate token
+		jwt.verifyToken(token, config.auth.JWT_SECRET_KEY).then(async (result) => {
+			if (!result) {
+				return res.status(httpCode.FORBIDDEN).json({ error: { message: '', details: null } });
 			}
+			const key = config.db.REDIS_AT_PREFIX + result.username;
+
+			const value = await redis.get(key);
+
+			if (!value || value !== token) return res.status(httpCode.FORBIDDEN).json({});
+
+			req.body.username = result.username;
+			next();
 		});
 	} catch (error) {
-		return res.status(httpCode.INTERNAL_SERVER_ERROR).json(error);
+		return res.status(httpCode.INTERNAL_SERVER_ERROR).json({
+			error: { message: 'Unknown Error Occurred', details: error },
+		});
 	}
 };
 

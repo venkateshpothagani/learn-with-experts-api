@@ -128,8 +128,14 @@ All notable changes to this project will be documented in this file
 
 ### Added
 
--   Ed points to update and delete user.
+-   End points to update and delete user.
 
 ### Fixed
 
 -   Few bug fixes including routing mapping and password pattern checking.
+
+## [0.5.0] - 2022-03-26
+
+### Added
+
+-   Redis DB to store access and refresh token.

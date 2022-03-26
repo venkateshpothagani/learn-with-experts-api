@@ -1,20 +1,17 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const dbConnect = (URI: string) => {
-  return (() => {
-    mongoose
-      .connect(URI)
-      .then((response) => {
-        console.log("=========Successfully connected to ===========");
-        console.log(`Connected to "${response.connection.name}"`);
-        console.log("==============================================");
-      })
-      .catch((error) => {
-        console.log("=======Failed to connect DB=======");
-        console.log(error.message);
-        console.log("==================================");
-      });
-  })();
+	return (() => {
+		mongoose
+			.connect(URI)
+			.then((response) => {
+				console.log(`\n===========Connected to "${response.connection.name}"===========\n`);
+			})
+			.catch((error) => {
+				console.log('\n===========Failed to connect DB===========\n');
+				console.log(error);
+			});
+	})();
 };
 
 export default dbConnect;

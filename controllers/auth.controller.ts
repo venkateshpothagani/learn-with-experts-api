@@ -8,10 +8,10 @@ import bycrypt from '../utils/bycrypt';
 import jwt from 'jsonwebtoken';
 import config from '../config/app.config';
 import DatabaseOperations from '../utils/dbOperations';
+import redis from '../utils/redis';
 
 class Authenticator {
 	/**
-	 *
 	 * @param req express.Request
 	 * @param res express.Response
 	 * @description Register new user
@@ -24,11 +24,11 @@ class Authenticator {
 
 			// Check password pattern
 			if (!pattern.test(body.password))
-				return res.status(httpCode.BAD_REQUEST).json({ message: "Passwords doesn't requirements" });
+				return res.status(httpCode.BAD_REQUEST).json({ error: { message: "Passwords doesn't requirements" } });
 
 			// Password comparison
 			if (!(body.password === body.confirmPassword))
-				return res.status(httpCode.BAD_REQUEST).json({ message: 'Passwords are not matched' });
+				return res.status(httpCode.BAD_REQUEST).json({ error: { message: 'Passwords are not matched' } });
 
 			// Password encryption
 			const passwordHash = await bycrypt.encryptPassword(body.password);
@@ -50,7 +50,6 @@ class Authenticator {
 	};
 
 	/**
-	 *
 	 * @param req express.Request
 	 * @param res express.Response
 	 * @description Authenticates user and returns jwttemp token for successful authentication
@@ -67,7 +66,7 @@ class Authenticator {
 					// Compare passwords
 					bycrypt.comparePassword(body.password, response.password).then((result) => {
 						if (!result) {
-							return res.status(httpCode.BAD_REQUEST).json({ message: 'Wrong password' });
+							return res.status(httpCode.BAD_REQUEST).json({ error: { message: 'Wrong password' } });
 						} else {
 							const accessToken = jwt.sign({ username: body.username }, config.auth.JWT_SECRET_KEY, {
 								expiresIn: config.auth.JWT_EXPIRES_IN,
@@ -75,33 +74,29 @@ class Authenticator {
 
 							const refreshToken = jwt.sign(
 								{ username: body.username },
-								config.auth.JWT_REFRESH_SECRET_KEY
+								config.auth.JWT_REFRESH_SECRET_KEY,
+								{ expiresIn: config.auth.JWT_REFRESH_EXPIRES_IN }
 							);
 
-							// Save access token to check to whether client is logged out or not.
-							RefreshTokenModel.create({
-								username: 'temp ' + response.username,
-								refreshToken: accessToken,
-							}).catch((error) => {
-								return res.status(httpCode.INTERNAL_SERVER_ERROR).json(error);
-							});
+							const accessTokenKey = config.db.REDIS_AT_PREFIX + response.username;
+							const refreshTokenKey = config.db.REDIS_RT_PREFIX + response.username;
 
-							// Save refresh token in database
-							RefreshTokenModel.create({ username: response.username, refreshToken })
-								.then((result) => {
-									return res
-										.status(httpCode.OK)
-										.json({ accessToken, refreshToken: result.refreshToken });
-								})
+							// Save access token in redis with expiration time
+							redis.setex(accessTokenKey, config.auth.JWT_EXPIRES_IN, accessToken).catch((error) => {
+								clear
+
+							// Save refresh token in redis with expiration time
+							redis
+								.setex(refreshTokenKey, config.auth.JWT_REFRESH_EXPIRES_IN, refreshToken)
 								.catch((error) => {
-									return res.status(httpCode.INTERNAL_SERVER_ERROR).json(error);
+									return res.status(httpCode.INTERNAL_SERVER_ERROR).json({ error });
 								});
 						}
 					});
 				}
 			});
 		} catch (error) {
-			return res.status(httpCode.INTERNAL_SERVER_ERROR).json(error);
+			return res.status(httpCode.INTERNAL_SERVER_ERROR).json({ error });
 		}
 	};
 
