@@ -139,3 +139,14 @@ All notable changes to this project will be documented in this file
 ### Added
 
 -   Redis DB to store access and refresh token.
+
+## [0.5.1] - 2022-03-27
+
+### Changed
+
+-   Minor changes.
+-   Text in reponse updated.
+
+### Fixed
+
+-   Issues related to auth. end points are fixed.

@@ -1,9 +1,9 @@
 import { Router } from 'express';
 
-const router = Router();
-
 import auth from '../controllers/auth.controller';
 import authorize from '../middlewares/authorize.middleware';
+
+const router = Router();
 
 router.post('/signup', auth.signup);
 
@@ -13,8 +13,8 @@ router.post('/logout', authorize, auth.logout);
 
 router.post('/refresh', auth.refresh);
 
-router.put('/update',authorize, auth.update);
+router.put('/update', authorize, auth.update);
 
-router.delete('/remove', authorize, );
+router.delete('/remove', authorize, auth.remove);
 
 export default router;
