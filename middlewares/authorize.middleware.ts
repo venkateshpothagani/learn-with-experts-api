@@ -14,7 +14,7 @@ import redis from '../utils/redis';
  * 2. Validate token
  * 3. Compare with server stored token
  */
-const authorize = (req: any, res: any, next: any) => {
+const authorize = async (req: any, res: any, next: any) => {
 	try {
 		//Get token from user request
 		const authHeader = req.headers['authorization'];
@@ -29,19 +29,37 @@ const authorize = (req: any, res: any, next: any) => {
 			});
 
 		//Validate token
-		jwt.verifyToken(token, config.auth.JWT_SECRET_KEY).then(async (result) => {
-			if (!result) {
-				return res.status(httpCode.FORBIDDEN).json({ error: { message: '', details: null } });
-			}
-			const key = config.db.REDIS_AT_PREFIX + result.username;
+		jwt.verifyToken(token, config.auth.JWT_SECRET_KEY)
+			.then(async (result) => {
+				if (!result) {
+					return res
+						.status(httpCode.FORBIDDEN)
+						.json({ error: { message: 'User token verification failed - 01', details: null } });
+				}
 
-			const value = await redis.get(key);
+				const key = config.db.REDIS_AT_PREFIX + result.username;
 
-			if (!value || value !== token) return res.status(httpCode.FORBIDDEN).json({});
-
-			req.body.username = result.username;
-			next();
-		});
+				redis
+					.get(key)
+					.then((value) => {
+						if (!value || value !== token)
+							return res
+								.status(httpCode.FORBIDDEN)
+								.json({ error: { message: 'User token verification failed - 02', details: null } });
+						req.body.username = result.username;
+						next();
+					})
+					.catch((error) => {
+						return res.status(httpCode.INTERNAL_SERVER_ERROR).json({
+							error: { message: 'Error occurred while validating user token', details: error },
+						});
+					});
+			})
+			.catch((error) => {
+				return res.status(httpCode.FORBIDDEN).json({
+					error: { message: 'Invalid user token', details: error },
+				});
+			});
 	} catch (error) {
 		return res.status(httpCode.INTERNAL_SERVER_ERROR).json({
 			error: { message: 'Unknown Error Occurred', details: error },

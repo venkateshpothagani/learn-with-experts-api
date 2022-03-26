@@ -8,6 +8,7 @@ import postRoutes from './routes/post.route';
 import voteRoutes from './routes/vote.route';
 import config from './config/app.config';
 import dbConnect from './utils/databaseConnect';
+import redisClient from './utils/redis';
 import cors from './middlewares/cors.middleware';
 
 const app: Express = express();
@@ -16,6 +17,10 @@ app.use(express.json());
 app.use(cors);
 
 dbConnect(config.db.MONGODB_URI);
+
+redisClient.on('connect', function () {
+	console.log('\n===========Connected to Redis===========\n');
+});
 
 app.use('/api', appRoutes);
 app.use('/api/user', authRoutes);

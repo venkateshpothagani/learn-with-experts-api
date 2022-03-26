@@ -7,10 +7,6 @@ import User from '../interfaces/User.interface';
 import Vote from '../interfaces/Vote.interface';
 import httpCode from './httpcodes';
 
-/**
- * @description Class with static method to perform action on database
- *
- */
 class DatabaseOperations {
 	/**
 	 *
@@ -28,10 +24,12 @@ class DatabaseOperations {
 		model
 			.create(data)
 			.then((result) => {
-				return res.status(httpCode.CREATED).json(result);
+				return res.status(httpCode.CREATED).json({ result });
 			})
 			.catch((error) => {
-				return res.status(httpCode.BAD_REQUEST).json(error);
+				return res
+					.status(httpCode.BAD_REQUEST)
+					.json({ error: { message: 'Unable to create document.', details: error } });
 			});
 
 	/**
@@ -50,10 +48,12 @@ class DatabaseOperations {
 		model
 			.remove(filter)
 			.then((result) => {
-				return res.status(httpCode.ACCEPTED).json(result);
+				return res.status(httpCode.OK).json({ result });
 			})
 			.catch((error) => {
-				return res.status(httpCode.BAD_REQUEST).json(error);
+				return res
+					.status(httpCode.BAD_REQUEST)
+					.json({ error: { message: 'Unable to remove document.', details: error } });
 			});
 
 	/**
@@ -72,10 +72,12 @@ class DatabaseOperations {
 		model
 			.findOne(filter)
 			.then((result) => {
-				return res.status(httpCode.ACCEPTED).json(result);
+				return res.status(httpCode.OK).json({ result });
 			})
 			.catch((error) => {
-				return res.status(httpCode.BAD_REQUEST).json(error);
+				return res
+					.status(httpCode.BAD_REQUEST)
+					.json({ error: { message: 'Unable to get document.', details: error } });
 			});
 
 	/**
@@ -96,10 +98,12 @@ class DatabaseOperations {
 		model
 			.updateOne(filter, data)
 			.then((result) => {
-				return res.status(httpCode.ACCEPTED).json(result);
+				return res.status(httpCode.OK).json({ result });
 			})
 			.catch((error) => {
-				return res.status(httpCode.BAD_REQUEST).json(error);
+				return res
+					.status(httpCode.BAD_REQUEST)
+					.json({ error: { message: 'Unable to update document.', details: error } });
 			});
 }
 
