@@ -1,14 +1,14 @@
 import { Schema } from 'mongoose';
 
 interface Expert {
-	id?: Schema.Types.ObjectId;
+	id: string;
 	username: string;
-	personalName: string;
+	fullName: string;
 	mail: string;
-	expertizeTech: string;
-	interestedTech: string;
+	expertizeTech: Schema.Types.Array;
+	interestedTech: Schema.Types.Array;
 	description: string;
-	languages: string;
+	languages: Schema.Types.Array;
 }
 
 export default Expert;
