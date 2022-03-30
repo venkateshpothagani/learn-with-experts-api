@@ -2,6 +2,7 @@ import httpCode from '../utils/httpcodes';
 import config from '../config/app.config';
 import jwt from '../utils/jwt';
 import redis from '../utils/redis';
+import { Response, Request, NextFunction } from 'express';
 
 /**
  *
@@ -14,7 +15,7 @@ import redis from '../utils/redis';
  * 2. Validate token
  * 3. Compare with server stored token
  */
-const authorize = async (req: any, res: any, next: any) => {
+const authorize = async (req: Request, res: Response, next: NextFunction) => {
 	try {
 		//Get token from user request
 		const authHeader = req.headers['authorization'];

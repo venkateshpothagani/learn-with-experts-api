@@ -5,6 +5,7 @@ interface Post {
 	userId: Schema.Types.ObjectId;
 	type: 'post' | 'question';
 	description: string;
+	tags: Schema.Types.Array;
 	timestamp: Schema.Types.Date;
 }
 
