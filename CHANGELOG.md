@@ -150,3 +150,16 @@ All notable changes to this project will be documented in this file
 ### Fixed
 
 -   Issues related to auth. end points are fixed.
+
+## [0.5.2] - 2022-03-31
+
+### Changed
+
+-   Minor changes in models now id isn't ObjectId type.
+
+### Removed
+
+-   Refresh fresh token is removed. Using Redis cache and both access and refresh token saved after creating.
+
+
+
