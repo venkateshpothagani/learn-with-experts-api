@@ -1,9 +1,9 @@
 import { Schema } from 'mongoose';
 
 interface Comment {
-	id?: Schema.Types.ObjectId;
-	userId: Schema.Types.ObjectId;
-	parentId: Schema.Types.ObjectId;
+	id: string;
+	userId: string;
+	parentId: string;
 	type: 'answer' | 'comment' | 'reply';
 	description: string;
 	timestamp: Schema.Types.Date;

@@ -11,11 +11,12 @@ class ExpertController {
 	 * @param req express.Request
 	 * @param res express.Response
 	 * @description
+	 * Successful response contains feed based on user interested tech, institution, language, description and gender fields
 	 */
 	static getFeed = (req: Request, res: Response) => {
 		try {
 			const body: Expert = { ...req.body };
-
+			// get free
 			UserModel.find({ ...body })
 				.then((result) => {
 					return res.status(httpCode.ACCEPTED).json(result);

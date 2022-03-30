@@ -1,18 +1,18 @@
 import { Schema } from 'mongoose';
 
 interface User {
-	id?: Schema.Types.ObjectId;
+	id: string;
 	username: string;
 	fullName?: string;
 	mail?: string;
 	password: string;
 	confirmPassword?: string;
-	expertizeTech?: string;
-	interestedTech?: string;
+	expertizeTech?: Schema.Types.Array;
+	interestedTech?: Schema.Types.Array;
 	description?: string;
 	institution?: string;
-	gender?: string;
-	languages?: string;
+	gender?: 'Male' | 'Female' | 'Other';
+	languages?: Schema.Types.Array;
 	phone?: string;
 	address?: string;
 }

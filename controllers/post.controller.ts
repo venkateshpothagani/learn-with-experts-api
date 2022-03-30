@@ -18,7 +18,9 @@ class PostController {
 
 			DatabaseOperations.create(PostModel, body, res);
 		} catch (error) {
-			return res.status(httpCode.INTERNAL_SERVER_ERROR).json(error);
+			return res
+				.status(httpCode.INTERNAL_SERVER_ERROR)
+				.json({ error: { message: 'Unknown Error Occurred', details: error } });
 		}
 	};
 
@@ -34,7 +36,9 @@ class PostController {
 
 			DatabaseOperations.delete(PostModel, body, res);
 		} catch (error) {
-			return res.status(httpCode.INTERNAL_SERVER_ERROR).json(error);
+			return res
+				.status(httpCode.INTERNAL_SERVER_ERROR)
+				.json({ error: { message: 'Unknown Error Occurred', details: error } });
 		}
 	};
 
@@ -42,21 +46,27 @@ class PostController {
 	 *
 	 * @param req express.Request
 	 * @param res express.Response
-	 * @description Get all posts
+	 * @description 
+	 * Get all posts\
+	 * Feed depends on user interested tech and sort by timestamp.
 	 */
 	static getFeed = async (req: Request, res: Response) => {
 		try {
 			const body: Post = { ...req.body };
-
 			PostModel.find({ ...body })
+				.sort({ timestamp: -1 })
 				.then((result) => {
-					return res.status(httpCode.ACCEPTED).json(result);
+					return res.status(httpCode.OK).json(result);
 				})
 				.catch((error) => {
-					return res.status(httpCode.BAD_REQUEST).json(error);
+					return res
+						.status(httpCode.INTERNAL_SERVER_ERROR)
+						.json({ error: { message: 'Unable to get feed', details: error } });
 				});
 		} catch (error) {
-			return res.status(httpCode.INTERNAL_SERVER_ERROR).json(error);
+			return res
+				.status(httpCode.INTERNAL_SERVER_ERROR)
+				.json({ error: { message: 'Unknown Error Occurred', details: error } });
 		}
 	};
 
@@ -72,7 +82,9 @@ class PostController {
 
 			DatabaseOperations.getOne(PostModel, body, res);
 		} catch (error) {
-			return res.status(httpCode.INTERNAL_SERVER_ERROR).json(error);
+			return res
+				.status(httpCode.INTERNAL_SERVER_ERROR)
+				.json({ error: { message: 'Unable to verify JWT Token', details: error } });
 		}
 	};
 
@@ -88,7 +100,9 @@ class PostController {
 
 			DatabaseOperations.update(PostModel, { id: body.id }, { ...body.post }, res);
 		} catch (error) {
-			return res.status(httpCode.INTERNAL_SERVER_ERROR).json(error);
+			return res
+				.status(httpCode.INTERNAL_SERVER_ERROR)
+				.json({ error: { message: 'Unable to verify JWT Token', details: error } });
 		}
 	};
 }

@@ -6,6 +6,7 @@ const PostSchema: Schema<Post> = new Schema({
 	userId: { type: Schema.Types.ObjectId, required: true, ref: 'User' },
 	type: { type: String, required: true },
 	description: { type: String, required: true },
+	tags: { type: Schema.Types.Array, required: true },
 	timestamp: { type: Schema.Types.Date, required: true },
 });
 

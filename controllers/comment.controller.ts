@@ -18,7 +18,9 @@ class CommentController {
 
 			DatabaseOperations.create(CommentModel, body, res);
 		} catch (error) {
-			return res.status(httpCode.INTERNAL_SERVER_ERROR).json(error);
+			return res
+				.status(httpCode.INTERNAL_SERVER_ERROR)
+				.json({ error: { message: 'Unable to verify JWT Token', details: error } });
 		}
 	};
 
@@ -34,7 +36,9 @@ class CommentController {
 
 			DatabaseOperations.delete(CommentModel, body, res);
 		} catch (error) {
-			return res.status(httpCode.INTERNAL_SERVER_ERROR).json(error);
+			return res
+				.status(httpCode.INTERNAL_SERVER_ERROR)
+				.json({ error: { message: 'Unable to verify JWT Token', details: error } });
 		}
 	};
 
@@ -47,16 +51,20 @@ class CommentController {
 	static getFeed = async (req: Request, res: Response) => {
 		try {
 			const body: Comment = { ...req.body };
-
+			// Based on post id
 			CommentModel.find({ ...body })
 				.then((result) => {
 					return res.status(httpCode.ACCEPTED).json(result);
 				})
 				.catch((error) => {
-					return res.status(httpCode.BAD_REQUEST).json(error);
+					return res
+						.status(httpCode.BAD_REQUEST)
+						.json({ error: { message: 'Unable to verify JWT Token', details: error } });
 				});
 		} catch (error) {
-			return res.status(httpCode.INTERNAL_SERVER_ERROR).json(error);
+			return res
+				.status(httpCode.INTERNAL_SERVER_ERROR)
+				.json({ error: { message: 'Unable to verify JWT Token', details: error } });
 		}
 	};
 
@@ -72,7 +80,9 @@ class CommentController {
 
 			DatabaseOperations.getOne(CommentModel, body, res);
 		} catch (error) {
-			return res.status(httpCode.INTERNAL_SERVER_ERROR).json(error);
+			return res
+				.status(httpCode.INTERNAL_SERVER_ERROR)
+				.json({ error: { message: 'Unable to verify JWT Token', details: error } });
 		}
 	};
 
@@ -88,7 +98,9 @@ class CommentController {
 
 			DatabaseOperations.update(CommentModel, { id: body.id }, { ...body.post }, res);
 		} catch (error) {
-			return res.status(httpCode.INTERNAL_SERVER_ERROR).json(error);
+			return res
+				.status(httpCode.INTERNAL_SERVER_ERROR)
+				.json({ error: { message: 'Unknown Error Occurred', details: error } });
 		}
 	};
 }
