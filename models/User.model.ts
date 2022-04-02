@@ -28,7 +28,7 @@ const UserSchema: Schema<User> = new Schema({
 	},
 	description: { type: String, required: false },
 	institution: { type: String, required: false },
-	gender: { type: String, required: false, enum: ['Male', 'Female'] },
+	gender: { type: String, required: false },
 	languages: { type: String, required: false },
 	phone: { type: String, required: false },
 	address: { type: String, required: false },

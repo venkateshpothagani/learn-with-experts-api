@@ -3,8 +3,8 @@ import { Schema } from 'mongoose';
 interface Vote {
 	id: string;
 	userRef: string;
-	postRef: string;
-	type: Schema.Types.Array;
+	postAndCommentRef: string;
+	type: string;
 	timestamp: Schema.Types.Date;
 }
 export interface VoteCounter {

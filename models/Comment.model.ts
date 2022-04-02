@@ -3,9 +3,8 @@ import { Schema, model } from 'mongoose';
 import Comment from '../interfaces/Comment.interface';
 
 const CommentSchema: Schema<Comment> = new Schema({
-	userId: { type: Schema.Types.String, required: true, ref: 'User' },
-	parentId: { type: Schema.Types.String, required: true, ref: 'Post' },
-	type: { type: String, required: true },
+	userRef: { type: String, required: true, ref: 'User' },
+	postRef: { type: String, required: true, ref: 'Post' },
 	description: { type: String, required: true },
 	timestamp: { type: Schema.Types.Date, required: true },
 });
