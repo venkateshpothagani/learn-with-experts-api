@@ -2,6 +2,7 @@ import { Schema, model } from 'mongoose';
 import User from '../interfaces/User.interface';
 
 const UserSchema: Schema<User> = new Schema({
+	id: { type: String, required: true, unique: true },
 	username: {
 		type: String,
 		required: true,
@@ -21,15 +22,9 @@ const UserSchema: Schema<User> = new Schema({
 		unique: true,
 		maxlength: 50,
 	},
-	expertizeTech: { type: String, required: false },
-	interestedTech: {
-		type: String,
-		required: false,
-	},
 	description: { type: String, required: false },
 	institution: { type: String, required: false },
 	gender: { type: String, required: false },
-	languages: { type: String, required: false },
 	phone: { type: String, required: false },
 	address: { type: String, required: false },
 });

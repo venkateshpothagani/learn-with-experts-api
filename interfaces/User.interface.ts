@@ -7,8 +7,6 @@ interface User {
 	mail?: string;
 	password: string;
 	confirmPassword?: string;
-	expertizeTech?: Schema.Types.Array;
-	interestedTech?: Schema.Types.Array;
 	description?: string;
 	institution?: string;
 	gender?: 'Male' | 'Female' | 'Other';

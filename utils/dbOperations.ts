@@ -13,8 +13,8 @@ class DatabaseOperations {
 	 * @param model mongoose.Model<T>
 	 * @param data Comment | User | Post | Vote
 	 * @param res express.Response
-	 * @returns None
-	 * @description Method to create document in database.
+	 * @returns res express.Response
+	 * @description Creates document in database.
 	 */
 	static create = async (
 		model: Model<Post> | Model<Comment> | Model<Post> | Model<Vote> | Model<User>,
@@ -24,12 +24,10 @@ class DatabaseOperations {
 		model
 			.create(data)
 			.then((result) => {
-				return res.status(httpCode.CREATED).json({ result });
+				return res.status(httpCode.CREATED).json({ message: 'Document saved successfully', data: result });
 			})
 			.catch((error) => {
-				return res
-					.status(httpCode.BAD_REQUEST)
-					.json({ error: { message: 'Unable to create document.', details: error } });
+				return res.status(httpCode.BAD_REQUEST).json({ message: 'Unable to create document.', details: error });
 			});
 
 	/**
@@ -37,8 +35,8 @@ class DatabaseOperations {
 	 * @param model mongoose.Model<T>
 	 * @param filter Object
 	 * @param res express.Reponse
-	 * @returns None
-	 * @description Method to delete documents which are matched with given filter.
+	 * @returns res express.Reponse
+	 * @description Deletes documents which are matched with given filter.
 	 */
 	static delete = async (
 		model: Model<Post> | Model<Comment> | Model<Post> | Model<Comment> | Model<User>,
@@ -48,12 +46,10 @@ class DatabaseOperations {
 		model
 			.remove(filter)
 			.then((result) => {
-				return res.status(httpCode.OK).json({ result });
+				return res.status(httpCode.OK).json({ message: 'Document deleted successfully', data: result });
 			})
 			.catch((error) => {
-				return res
-					.status(httpCode.BAD_REQUEST)
-					.json({ error: { message: 'Unable to remove document.', details: error } });
+				return res.status(httpCode.BAD_REQUEST).json({ message: 'Unable to remove document.', details: error });
 			});
 
 	/**
@@ -61,8 +57,8 @@ class DatabaseOperations {
 	 * @param model mongoose.Model<T>
 	 * @param filter Object
 	 * @param res express.Reponse
-	 * @returns None
-	 * @description Method to get a single document of given id.
+	 * @returns res express.Reponse
+	 * @description Gets a single document of given id.
 	 */
 	static getOne = async (
 		model: Model<Post> | Model<Comment> | Model<Post> | Model<Comment> | Model<User>,
@@ -72,12 +68,10 @@ class DatabaseOperations {
 		model
 			.findOne(filter)
 			.then((result) => {
-				return res.status(httpCode.OK).json({ result });
+				return res.status(httpCode.OK).json({ message: 'Document fetched successfully', data: result });
 			})
 			.catch((error) => {
-				return res
-					.status(httpCode.BAD_REQUEST)
-					.json({ error: { message: 'Unable to get document.', details: error } });
+				return res.status(httpCode.BAD_REQUEST).json({ message: 'Unable to get document.', details: error });
 			});
 
 	/**
@@ -86,8 +80,8 @@ class DatabaseOperations {
 	 * @param filter Object
 	 * @param data Comment | User | Post | Vote,
 	 * @param res express.Response
-	 * @returns None
-	 * @description Method to update a document which is matched given filter.
+	 * @returns res express.Response
+	 * @description Updates a document which is matched given filter.
 	 */
 	static update = async (
 		model: Model<Post> | Model<Comment> | Model<Post> | Model<Comment> | Model<User>,
@@ -98,7 +92,7 @@ class DatabaseOperations {
 		model
 			.updateOne(filter, data)
 			.then((result) => {
-				return res.status(httpCode.OK).json({ result });
+				return res.status(httpCode.OK).json({ message: 'Document updated successfully', data: result });
 			})
 			.catch((error) => {
 				return res

@@ -3,6 +3,7 @@ import { Schema, model } from 'mongoose';
 import Vote from '../interfaces/Vote.interface';
 
 const VoteSchema: Schema<Vote> = new Schema({
+	id: { type: String, required: true, unique: true },
 	postAndCommentRef: [
 		{ type: String, required: true, ref: 'Post' },
 		{ type: String, required: true, ref: 'Comment' },

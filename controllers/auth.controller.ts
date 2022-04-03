@@ -24,22 +24,18 @@ class Authenticator {
 			// Check password pattern
 			if (!pattern.test(body.password))
 				return res.status(httpCode.BAD_REQUEST).json({
-					error: {
-						message: "Passwords doesn't requirements",
-						details: {
-							value: body.password,
-							pattern: config.auth.PASSWORD_PATTERN,
-						},
+					message: "Passwords doesn't requirements",
+					details: {
+						value: body.password,
+						pattern: config.auth.PASSWORD_PATTERN,
 					},
 				});
 
 			// Password comparison
 			if (body.password !== body.confirmPassword)
 				return res.status(httpCode.BAD_REQUEST).json({
-					error: {
-						message: 'Passwords are not matched',
-						details: { password: body.password, confirmPassword: body.confirmPassword },
-					},
+					message: 'Passwords are not matched',
+					details: { password: body.password, confirmPassword: body.confirmPassword },
 				});
 
 			// Password encryption
@@ -49,18 +45,20 @@ class Authenticator {
 			// Save new user in database
 			UserModel.create(user)
 				.then((result) => {
-					return res
-						.status(httpCode.CREATED)
-						.json({ id: result.id, username: result.username, fullName: result.fullName });
+					return res.status(httpCode.CREATED).json({
+						message: 'User data saved successfully',
+						data: { id: result.id, username: result.username, fullName: result.fullName },
+					});
 				})
 				.catch((error) => {
 					return res
 						.status(httpCode.BAD_REQUEST)
-						.json({ error: { message: "Use data doesn't meet requirements.", details: error } });
+						.json({ message: "Use data doesn't meet requirements.", details: error });
 				});
 		} catch (error) {
 			return res.status(httpCode.INTERNAL_SERVER_ERROR).json({
-				error: { message: 'Unknown Error Occurred', details: error },
+				message: 'Unknown Error Occurred',
+				details: error,
 			});
 		}
 	};
@@ -77,12 +75,12 @@ class Authenticator {
 			// Find user by username
 			UserModel.findOne({ username: body.username }).then((response) => {
 				if (!response) {
-					return res.status(httpCode.NOT_FOUND).json({ error: { message: 'User not found' } });
+					return res.status(httpCode.NOT_FOUND).json({ message: 'User not found', details: null });
 				} else {
 					// Compare passwords
 					bycrypt.comparePassword(body.password, response.password).then(async (result) => {
 						if (!result) {
-							return res.status(httpCode.UNAUTHORIZED).json({ error: { message: 'Wrong password' } });
+							return res.status(httpCode.UNAUTHORIZED).json({ message: 'Wrong password', details: null });
 						} else {
 							const accessToken = jwt.getAccessToken(body.username);
 							const refreshToken = jwt.getRefreshToken(body.username);
@@ -95,7 +93,8 @@ class Authenticator {
 								.setex(accessTokenKey, parseInt(config.auth.JWT_EXPIRES_IN), accessToken)
 								.catch((error) => {
 									return res.status(httpCode.INTERNAL_SERVER_ERROR).json({
-										error: { message: 'Issue occurred while saving JWT Token', details: error },
+										message: 'Unknown error occurred while saving JWT Token',
+										details: error,
 									});
 								});
 
@@ -103,17 +102,23 @@ class Authenticator {
 							redis
 								.setex(refreshTokenKey, parseInt(config.auth.JWT_REFRESH_EXPIRES_IN), refreshToken)
 								.catch((error) => {
-									return res.status(httpCode.INTERNAL_SERVER_ERROR).json({ error });
+									return res.status(httpCode.INTERNAL_SERVER_ERROR).json({
+										message: 'Unknown error occurred while saving JWT Token',
+										details: error,
+									});
 								});
 
-							return res.status(httpCode.OK).json({ accessToken, refreshToken });
+							return res
+								.status(httpCode.OK)
+								.json({ message: 'User logged in successfully', data: { accessToken, refreshToken } });
 						}
 					});
 				}
 			});
 		} catch (error) {
 			return res.status(httpCode.INTERNAL_SERVER_ERROR).json({
-				error: { message: 'Unknown Error Occurred', details: error },
+				message: 'Unknown Error Occurred',
+				details: error,
 			});
 		}
 	};
@@ -128,17 +133,19 @@ class Authenticator {
 		try {
 			if (!req.body.id || !req.body.data) {
 				return res.status(httpCode.BAD_REQUEST).json({
-					error: { message: 'Failed to update document', details: { id: null, data: null } },
+					message: 'Failed to update document',
+					details: { id: null, data: null },
 				});
 			} else {
 				const id: string = req.body.id;
 				const data = { ...req.body.data };
 
-				DatabaseOperations.update(UserModel, { id }, data, res);
+				return DatabaseOperations.update(UserModel, { id }, data, res);
 			}
 		} catch (error) {
 			return res.status(httpCode.INTERNAL_SERVER_ERROR).json({
-				error: { message: 'Unknown Error Occurred', details: error },
+				message: 'Unknown Error Occurred',
+				details: error,
 			});
 		}
 	};
@@ -153,10 +160,11 @@ class Authenticator {
 		try {
 			const id: string = req.body.id;
 
-			DatabaseOperations.delete(UserModel, { id }, res);
+			return DatabaseOperations.delete(UserModel, { id }, res);
 		} catch (error) {
 			return res.status(httpCode.INTERNAL_SERVER_ERROR).json({
-				error: { message: 'Unknown Error Occurred', details: error },
+				message: 'Unknown Error Occurred',
+				details: error,
 			});
 		}
 	};
@@ -172,7 +180,7 @@ class Authenticator {
 			const body: { refreshToken: string } = req.body;
 
 			if (!body.refreshToken) {
-				return res.status(httpCode.FORBIDDEN).json({ message: 'No refresh token' });
+				return res.status(httpCode.FORBIDDEN).json({ message: 'No refresh token', details: null });
 			}
 
 			jwt.verifyToken(body.refreshToken, config.auth.JWT_REFRESH_SECRET_KEY)
@@ -185,12 +193,12 @@ class Authenticator {
 					const refreshToken = await redis.get(refreshTokenKey);
 
 					if (refreshToken !== body.refreshToken)
-						return res
-							.status(httpCode.FORBIDDEN)
-							.json({ error: { message: 'Invalid user token', details: null } });
+						return res.status(httpCode.FORBIDDEN).json({ message: 'Invalid user token', details: null });
+
 					redis.setex(accessTokenKey, parseInt(config.auth.JWT_EXPIRES_IN), accessToken).catch((error) => {
 						return res.status(httpCode.INTERNAL_SERVER_ERROR).json({
-							error: { message: 'Issue occurred while saving JWT Token', details: error },
+							message: 'Unknown error occurred while saving JWT Token',
+							details: error,
 						});
 					});
 
@@ -198,12 +206,14 @@ class Authenticator {
 				})
 				.catch((error) => {
 					return res.status(httpCode.INTERNAL_SERVER_ERROR).json({
-						error: { message: 'Unable to verify JWT Token', details: error },
+						message: 'Unable to verify JWT Token',
+						details: error,
 					});
 				});
 		} catch (error) {
 			return res.status(httpCode.INTERNAL_SERVER_ERROR).json({
-				error: { message: 'Unknown Error Occurred', details: error },
+				message: 'Unknown Error Occurred',
+				details: error,
 			});
 		}
 	};
@@ -224,19 +234,20 @@ class Authenticator {
 			redis.del(accessTokenKey).catch((error) => {
 				return res
 					.status(httpCode.INTERNAL_SERVER_ERROR)
-					.json({ error: { message: 'Logout failed', details: error } });
+					.json({ message: 'Logout failed due to DB error', details: error });
 			});
 
 			redis.del(refreshTokenKey).catch((error) => {
 				return res
 					.status(httpCode.INTERNAL_SERVER_ERROR)
-					.json({ error: { message: 'Logout failed', details: error } });
+					.json({ message: 'Logout failed due to DB error', details: error });
 			});
 
 			return res.status(httpCode.OK).json({ message: 'Successfully logout' });
 		} catch (error) {
 			return res.status(httpCode.INTERNAL_SERVER_ERROR).json({
-				error: { message: 'Unknown Error Occurred', details: error },
+				message: 'Unknown Error Occurred',
+				details: error,
 			});
 		}
 	};

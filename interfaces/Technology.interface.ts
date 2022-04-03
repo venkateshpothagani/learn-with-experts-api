@@ -1,4 +1,5 @@
 interface Technology {
+	id: string;
 	name: string;
 	isInterested: boolean;
 	isExpertized: boolean;

@@ -1,4 +1,5 @@
 interface Tag {
+	id: string;
 	postRef: string;
 	name: string;
 }

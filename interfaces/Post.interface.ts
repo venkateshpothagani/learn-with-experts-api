@@ -2,7 +2,7 @@ import { Schema } from 'mongoose';
 
 interface Post {
 	id: string;
-	useRef: string;
+	userRef: string;
 	type: 'post' | 'question';
 	description: string;
 	tags: Schema.Types.Array;

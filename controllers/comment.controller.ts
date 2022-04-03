@@ -16,7 +16,7 @@ class CommentController {
 		try {
 			const body: Comment = { ...req.body };
 
-			DatabaseOperations.create(CommentModel, body, res);
+			return DatabaseOperations.create(CommentModel, body, res);
 		} catch (error) {
 			return res
 				.status(httpCode.INTERNAL_SERVER_ERROR)
@@ -34,7 +34,7 @@ class CommentController {
 		try {
 			const body: { id: string } = req.body;
 
-			DatabaseOperations.delete(CommentModel, body, res);
+			return DatabaseOperations.delete(CommentModel, body, res);
 		} catch (error) {
 			return res
 				.status(httpCode.INTERNAL_SERVER_ERROR)
@@ -78,7 +78,7 @@ class CommentController {
 		try {
 			const body: { id: string } = req.body;
 
-			DatabaseOperations.getOne(CommentModel, body, res);
+			return DatabaseOperations.getOne(CommentModel, body, res);
 		} catch (error) {
 			return res
 				.status(httpCode.INTERNAL_SERVER_ERROR)
@@ -96,7 +96,7 @@ class CommentController {
 		try {
 			const body: { id: string; post: Comment } = { ...req.body };
 
-			DatabaseOperations.update(CommentModel, { id: body.id }, { ...body.post }, res);
+			return DatabaseOperations.update(CommentModel, { id: body.id }, { ...body.post }, res);
 		} catch (error) {
 			return res
 				.status(httpCode.INTERNAL_SERVER_ERROR)
