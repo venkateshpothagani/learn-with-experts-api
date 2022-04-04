@@ -3,7 +3,6 @@ import { Schema, model } from 'mongoose';
 import Comment from '../interfaces/Comment.interface';
 
 const CommentSchema: Schema<Comment> = new Schema({
-	id: { type: String, required: true, unique: true },
 	userRef: { type: String, required: true, ref: 'User' },
 	postRef: { type: String, required: true, ref: 'Post' },
 	description: { type: String, required: true },

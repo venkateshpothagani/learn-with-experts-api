@@ -1,15 +1,10 @@
 import { Schema } from 'mongoose';
 
 interface Vote {
-	id: string;
-	userRef: string;
-	postAndCommentRef: string;
-	type: string;
+	userRef: Schema.Types.Array;
+	postAndCommentRef: Schema.Types.Array;
+	type: Schema.Types.String;
 	timestamp: Schema.Types.Date;
-}
-export interface VoteCounter {
-	upvotes: number;
-	downvotes: number;
 }
 
 export default Vote;

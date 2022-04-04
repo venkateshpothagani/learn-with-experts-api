@@ -1,13 +1,10 @@
 import { Schema } from 'mongoose';
 
 interface Comment {
-	id: string;
-	userRef: string;
-	postRef: string;
+	userRef: Schema.Types.ObjectId;
+	postRef: Schema.Types.ObjectId;
 	type: 'answer' | 'comment' | 'reply';
-	description: string;
-	upvote: number;
-	downvote: number;
+	description: Schema.Types.String;
 	timestamp: Schema.Types.Date;
 }
 

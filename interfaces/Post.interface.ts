@@ -1,10 +1,9 @@
 import { Schema } from 'mongoose';
 
 interface Post {
-	id: string;
-	userRef: string;
+	userRef: Schema.Types.ObjectId;
 	type: 'post' | 'question';
-	description: string;
+	description: Schema.Types.String;
 	tags: Schema.Types.Array;
 	timestamp: Schema.Types.Date;
 }

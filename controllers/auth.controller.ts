@@ -17,7 +17,21 @@ class Authenticator {
 	 */
 	static signup = async (req: Request, res: Response) => {
 		try {
-			const body: User = req.body;
+			const body: User = {
+				username: req.body.username,
+				password: req.body.password,
+				confirmPassword: req.body.confirmPassword,
+				interestedTech: req.body.interestedTech,
+				expertizedTech: req.body.expertizedTech,
+				languages: req.body.languages,
+				fullName: req.body.fullName || null,
+				mail: req.body.mail || null,
+				description: req.body.description || null,
+				institution: req.body.institution || null,
+				gender: req.body.gender || null,
+				phone: req.body.phone || null,
+				address: req.body.address || null,
+			};
 
 			const pattern = new RegExp(config.auth.PASSWORD_PATTERN);
 
@@ -27,7 +41,7 @@ class Authenticator {
 					message: "Passwords doesn't requirements",
 					details: {
 						value: body.password,
-						pattern: config.auth.PASSWORD_PATTERN,
+						pattern: String(config.auth.PASSWORD_PATTERN),
 					},
 				});
 
@@ -43,21 +57,12 @@ class Authenticator {
 			const user: User = { ...body, password: passwordHash };
 
 			// Save new user in database
-			UserModel.create(user)
-				.then((result) => {
-					return res.status(httpCode.CREATED).json({
-						message: 'User data saved successfully',
-						data: { id: result.id, username: result.username, fullName: result.fullName },
-					});
-				})
-				.catch((error) => {
-					return res
-						.status(httpCode.BAD_REQUEST)
-						.json({ message: "Use data doesn't meet requirements.", details: error });
-				});
-		} catch (error) {
+			const result = await UserModel.create(user);
+
+			return res.status(httpCode.CREATED).json({ message: 'User data saved successfully', data: result });
+		} catch (error: any) {
 			return res.status(httpCode.INTERNAL_SERVER_ERROR).json({
-				message: 'Unknown Error Occurred',
+				message: error.message || 'Unknown Error Occurred',
 				details: error,
 			});
 		}
@@ -93,7 +98,7 @@ class Authenticator {
 								.setex(accessTokenKey, parseInt(config.auth.JWT_EXPIRES_IN), accessToken)
 								.catch((error) => {
 									return res.status(httpCode.INTERNAL_SERVER_ERROR).json({
-										message: 'Unknown error occurred while saving JWT Token',
+										message: error.message || 'Unknown error occurred while saving JWT Token',
 										details: error,
 									});
 								});
@@ -103,7 +108,7 @@ class Authenticator {
 								.setex(refreshTokenKey, parseInt(config.auth.JWT_REFRESH_EXPIRES_IN), refreshToken)
 								.catch((error) => {
 									return res.status(httpCode.INTERNAL_SERVER_ERROR).json({
-										message: 'Unknown error occurred while saving JWT Token',
+										message: error.message || 'Unknown error occurred while saving JWT Token',
 										details: error,
 									});
 								});
@@ -115,9 +120,9 @@ class Authenticator {
 					});
 				}
 			});
-		} catch (error) {
+		} catch (error: any) {
 			return res.status(httpCode.INTERNAL_SERVER_ERROR).json({
-				message: 'Unknown Error Occurred',
+				message: error.message || 'Unknown Error Occurred',
 				details: error,
 			});
 		}
@@ -131,7 +136,7 @@ class Authenticator {
 	 */
 	static update = async (req: Request, res: Response) => {
 		try {
-			if (!req.body.id || !req.body.data) {
+			if (!req.body.username || !req.body.data) {
 				return res.status(httpCode.BAD_REQUEST).json({
 					message: 'Failed to update document',
 					details: { id: null, data: null },
@@ -142,9 +147,9 @@ class Authenticator {
 
 				return DatabaseOperations.update(UserModel, { id }, data, res);
 			}
-		} catch (error) {
+		} catch (error: any) {
 			return res.status(httpCode.INTERNAL_SERVER_ERROR).json({
-				message: 'Unknown Error Occurred',
+				message: error.message || 'Unknown Error Occurred',
 				details: error,
 			});
 		}
@@ -158,12 +163,12 @@ class Authenticator {
 	 */
 	static remove = async (req: Request, res: Response) => {
 		try {
-			const id: string = req.body.id;
+			const username: string = req.body.username;
 
-			return DatabaseOperations.delete(UserModel, { id }, res);
-		} catch (error) {
+			return DatabaseOperations.delete(UserModel, { username }, res);
+		} catch (error: any) {
 			return res.status(httpCode.INTERNAL_SERVER_ERROR).json({
-				message: 'Unknown Error Occurred',
+				message: error.message || 'Unknown Error Occurred',
 				details: error,
 			});
 		}
@@ -197,7 +202,7 @@ class Authenticator {
 
 					redis.setex(accessTokenKey, parseInt(config.auth.JWT_EXPIRES_IN), accessToken).catch((error) => {
 						return res.status(httpCode.INTERNAL_SERVER_ERROR).json({
-							message: 'Unknown error occurred while saving JWT Token',
+							message: error.message || 'Unknown error occurred while saving JWT Token',
 							details: error,
 						});
 					});
@@ -206,13 +211,13 @@ class Authenticator {
 				})
 				.catch((error) => {
 					return res.status(httpCode.INTERNAL_SERVER_ERROR).json({
-						message: 'Unable to verify JWT Token',
+						message: error.message || 'Unable to verify JWT Token',
 						details: error,
 					});
 				});
-		} catch (error) {
+		} catch (error: any) {
 			return res.status(httpCode.INTERNAL_SERVER_ERROR).json({
-				message: 'Unknown Error Occurred',
+				message: error.message || 'Unknown Error Occurred',
 				details: error,
 			});
 		}
@@ -234,19 +239,19 @@ class Authenticator {
 			redis.del(accessTokenKey).catch((error) => {
 				return res
 					.status(httpCode.INTERNAL_SERVER_ERROR)
-					.json({ message: 'Logout failed due to DB error', details: error });
+					.json({ message: error.message || 'Logout failed due to DB error', details: error });
 			});
 
 			redis.del(refreshTokenKey).catch((error) => {
 				return res
 					.status(httpCode.INTERNAL_SERVER_ERROR)
-					.json({ message: 'Logout failed due to DB error', details: error });
+					.json({ message: error.message || 'Logout failed due to DB error', details: error });
 			});
 
 			return res.status(httpCode.OK).json({ message: 'Successfully logout' });
-		} catch (error) {
+		} catch (error: any) {
 			return res.status(httpCode.INTERNAL_SERVER_ERROR).json({
-				message: 'Unknown Error Occurred',
+				message: error.message || 'Unknown Error Occurred',
 				details: error,
 			});
 		}

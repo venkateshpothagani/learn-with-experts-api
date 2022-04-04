@@ -27,7 +27,9 @@ class DatabaseOperations {
 				return res.status(httpCode.CREATED).json({ message: 'Document saved successfully', data: result });
 			})
 			.catch((error) => {
-				return res.status(httpCode.BAD_REQUEST).json({ message: 'Unable to create document.', details: error });
+				return res
+					.status(httpCode.BAD_REQUEST)
+					.json({ message: error.message || 'Unable to create document.', details: error });
 			});
 
 	/**
@@ -40,16 +42,18 @@ class DatabaseOperations {
 	 */
 	static delete = async (
 		model: Model<Post> | Model<Comment> | Model<Post> | Model<Comment> | Model<User>,
-		filter: Object,
+		filter: any,
 		res: Response
 	) =>
 		model
-			.remove(filter)
+			.deleteOne(filter)
 			.then((result) => {
 				return res.status(httpCode.OK).json({ message: 'Document deleted successfully', data: result });
 			})
 			.catch((error) => {
-				return res.status(httpCode.BAD_REQUEST).json({ message: 'Unable to remove document.', details: error });
+				return res
+					.status(httpCode.BAD_REQUEST)
+					.json({ message: error.message || 'Unable to remove document.', details: error });
 			});
 
 	/**
@@ -71,7 +75,9 @@ class DatabaseOperations {
 				return res.status(httpCode.OK).json({ message: 'Document fetched successfully', data: result });
 			})
 			.catch((error) => {
-				return res.status(httpCode.BAD_REQUEST).json({ message: 'Unable to get document.', details: error });
+				return res
+					.status(httpCode.BAD_REQUEST)
+					.json({ message: error.message || 'Unable to get document.', details: error });
 			});
 
 	/**
@@ -97,7 +103,7 @@ class DatabaseOperations {
 			.catch((error) => {
 				return res
 					.status(httpCode.BAD_REQUEST)
-					.json({ error: { message: 'Unable to update document.', details: error } });
+					.json({ error: { message: error.message || 'Unable to update document.', details: error } });
 			});
 }
 
