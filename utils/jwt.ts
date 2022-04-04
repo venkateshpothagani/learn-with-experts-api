@@ -10,8 +10,8 @@ class JWT {
 	 * @description Function generates JWT token for user
 	 *
 	 */
-	static getAccessToken(username: string) {
-		return jwt.sign({ username }, config.auth.JWT_SECRET_KEY, { expiresIn: config.auth.JWT_EXPIRES_IN });
+	static getAccessToken(username: string, id: string) {
+		return jwt.sign({ username, id }, config.auth.JWT_SECRET_KEY, { expiresIn: config.auth.JWT_EXPIRES_IN });
 	}
 
 	/**
@@ -21,7 +21,7 @@ class JWT {
 	 * @description Function generates JWT refresh token for user
 	 *
 	 */
-	static getRefreshToken(username: string) {
+	static getRefreshToken(username: string, id: string) {
 		return jwt.sign({ username }, config.auth.JWT_REFRESH_SECRET_KEY, {
 			expiresIn: config.auth.JWT_REFRESH_EXPIRES_IN,
 		});
@@ -35,7 +35,7 @@ class JWT {
 	 * @description	Function verifies JWT token
 	 */
 	static verifyToken = (token: string, secret: string) => {
-		return new Promise<CustomJwtPayload>((resolve, reject) => {
+		return new Promise<any>((resolve, reject) => {
 			jwt.verify(token, secret, (error: jwt.VerifyErrors | null, decoded: any) => {
 				if (error) {
 					return reject(error);

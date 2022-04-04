@@ -2,10 +2,10 @@ import { Schema } from 'mongoose';
 
 interface Post {
 	userRef: Schema.Types.ObjectId;
-	type: 'post' | 'question';
+	type: 'POST' | 'QUESTION';
 	description: Schema.Types.String;
 	tags: Schema.Types.Array;
-	timestamp: Schema.Types.Date;
+	timestamp: number;
 }
 
 export default Post;

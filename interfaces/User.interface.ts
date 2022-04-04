@@ -7,6 +7,7 @@ interface User {
 	interestedTech: Schema.Types.Array;
 	expertizedTech: Schema.Types.Array;
 	languages: Schema.Types.Array;
+	timestamp: number;
 	fullName?: string;
 	mail?: string;
 	description?: string;

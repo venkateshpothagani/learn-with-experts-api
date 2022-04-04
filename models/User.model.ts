@@ -7,6 +7,7 @@ const UserSchema: Schema<User> = new Schema({
 	interestedTech: { type: Schema.Types.Array, required: true },
 	expertizedTech: { type: Schema.Types.Array, required: true },
 	languages: { type: Schema.Types.Array, required: true },
+	timestamp: { type: Schema.Types.Number, required: true },
 	fullName: { type: String, required: false, minlength: 3, maxlength: 30 },
 	mail: { type: String, required: false, maxlength: 50 },
 	description: { type: String, required: false },

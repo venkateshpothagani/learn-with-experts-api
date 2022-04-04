@@ -22,21 +22,17 @@ const authorize = async (req: Request, res: Response, next: NextFunction) => {
 		const token = authHeader && authHeader.split(' ')[1];
 
 		if (token == null)
-			return res.status(httpCode.UNAUTHORIZED).json({
-				error: {
-					message: 'Access Token required to validate client',
-					details: null,
-				},
-			});
+			return res
+				.status(httpCode.UNAUTHORIZED)
+				.json({ message: 'Access Token required to validate client', details: null });
 
 		//Validate token
 		jwt.verifyToken(token, config.auth.JWT_SECRET_KEY)
 			.then(async (result) => {
-				if (!result) {
+				if (!result)
 					return res
 						.status(httpCode.FORBIDDEN)
-						.json({ error: { message: 'User token verification failed - 01', details: null } });
-				}
+						.json({ message: 'User token verification failed', details: result });
 
 				const key = config.db.REDIS_AT_PREFIX + result.username;
 
@@ -46,24 +42,28 @@ const authorize = async (req: Request, res: Response, next: NextFunction) => {
 						if (!value || value !== token)
 							return res
 								.status(httpCode.FORBIDDEN)
-								.json({ error: { message: 'User token verification failed - 02', details: null } });
+								.json({ message: 'User token verification failed', details: value });
 						req.body.username = result.username;
+						req.body.id = result.id;
 						next();
 					})
 					.catch((error) => {
 						return res.status(httpCode.INTERNAL_SERVER_ERROR).json({
-							error: { message: 'Error occurred while validating user token', details: error },
+							message: error.message || 'Error occurred while validating user token',
+							details: error,
 						});
 					});
 			})
 			.catch((error) => {
 				return res.status(httpCode.FORBIDDEN).json({
-					error: { message: 'Invalid user token', details: error },
+					message: error.message || 'Invalid user token',
+					details: error,
 				});
 			});
-	} catch (error) {
+	} catch (error: any) {
 		return res.status(httpCode.INTERNAL_SERVER_ERROR).json({
-			error: { message: 'Unknown Error Occurred', details: error },
+			message: error.message || 'Unknown Error Occurred',
+			details: error,
 		});
 	}
 };

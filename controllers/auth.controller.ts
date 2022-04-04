@@ -1,4 +1,5 @@
 import { Response, Request } from 'express';
+import { Schema } from 'mongoose';
 
 import User from '../interfaces/User.interface';
 import httpCode from '../utils/httpcodes';
@@ -24,6 +25,7 @@ class Authenticator {
 				interestedTech: req.body.interestedTech,
 				expertizedTech: req.body.expertizedTech,
 				languages: req.body.languages,
+				timestamp: Date.now(),
 				fullName: req.body.fullName || null,
 				mail: req.body.mail || null,
 				description: req.body.description || null,
@@ -87,8 +89,8 @@ class Authenticator {
 						if (!result) {
 							return res.status(httpCode.UNAUTHORIZED).json({ message: 'Wrong password', details: null });
 						} else {
-							const accessToken = jwt.getAccessToken(body.username);
-							const refreshToken = jwt.getRefreshToken(body.username);
+							const accessToken = jwt.getAccessToken(body.username, String(response._id));
+							const refreshToken = jwt.getRefreshToken(body.username, String(response._id));
 
 							const accessTokenKey = config.db.REDIS_AT_PREFIX + response.username;
 							const refreshTokenKey = config.db.REDIS_RT_PREFIX + response.username;
@@ -113,9 +115,10 @@ class Authenticator {
 									});
 								});
 
-							return res
-								.status(httpCode.OK)
-								.json({ message: 'User logged in successfully', data: { accessToken, refreshToken } });
+							return res.status(httpCode.OK).json({
+								message: 'User logged in successfully',
+								data: { accessToken, refreshToken, id: response._id, username: response.username },
+							});
 						}
 					});
 				}
@@ -190,7 +193,7 @@ class Authenticator {
 
 			jwt.verifyToken(body.refreshToken, config.auth.JWT_REFRESH_SECRET_KEY)
 				.then(async (result) => {
-					const accessToken = jwt.getAccessToken(result.username);
+					const accessToken = jwt.getAccessToken(result.username, String(result.id));
 
 					const accessTokenKey = config.db.REDIS_AT_PREFIX + result.username;
 					const refreshTokenKey = config.db.REDIS_RT_PREFIX + result.username;

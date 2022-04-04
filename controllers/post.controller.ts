@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { Schema } from 'mongoose';
 
 import httpCode from '../utils/httpcodes';
 import Post from '../interfaces/Post.interface';
@@ -14,13 +15,19 @@ class PostController {
 	 */
 	static create = async (req: Request, res: Response) => {
 		try {
-			const body: Post = { ...req.body };
+			const body: Post = {
+				userRef: req.body.id,
+				type: req.body.type,
+				description: req.body.description,
+				tags: req.body.tags,
+				timestamp: Date.now(),
+			};
 
-			DatabaseOperations.create(PostModel, body, res);
+			return DatabaseOperations.create(PostModel, body, res);
 		} catch (error: any) {
 			return res
 				.status(httpCode.INTERNAL_SERVER_ERROR)
-				.json({ error: { message: error.message || 'Unknown Error Occurred', details: error } });
+				.json({ message: error.message || 'Unknown Error Occurred', details: error });
 		}
 	};
 
@@ -34,11 +41,11 @@ class PostController {
 		try {
 			const body: { id: string } = req.body;
 
-			DatabaseOperations.delete(PostModel, body, res);
+			return DatabaseOperations.delete(PostModel, body, res);
 		} catch (error: any) {
 			return res
 				.status(httpCode.INTERNAL_SERVER_ERROR)
-				.json({ error: { message: error.message || 'Unknown Error Occurred', details: error } });
+				.json({ message: error.message || 'Unknown Error Occurred', details: error });
 		}
 	};
 
@@ -52,21 +59,32 @@ class PostController {
 	 */
 	static getFeed = async (req: Request, res: Response) => {
 		try {
-			const body: Post = { ...req.body };
-			PostModel.find({ ...body })
-				.sort({ timestamp: -1 })
+			const body: { type: string; tagOne: string; tagTwo: string; tagThree: string } = {
+				type: req.body.type,
+				tagOne: req.body.tagOne,
+				tagTwo: req.body.tagTwo,
+				tagThree: req.body.tagThree,
+			};
+			PostModel.find({ type: body.type })
+				.find({
+					$or: [
+						{ tags: { $in: body.tagOne } },
+						{ tags: { $in: body.tagTwo } },
+						{ tags: { $in: body.tagThree } },
+					],
+				})
 				.then((result) => {
 					return res.status(httpCode.OK).json(result);
 				})
 				.catch((error) => {
 					return res
 						.status(httpCode.INTERNAL_SERVER_ERROR)
-						.json({ error: { message: error.message || 'Unable to get feed', details: error } });
+						.json({ message: error.message || 'Unable to get feed', details: error });
 				});
 		} catch (error: any) {
 			return res
 				.status(httpCode.INTERNAL_SERVER_ERROR)
-				.json({ error: { message: error.message || 'Unknown Error Occurred', details: error } });
+				.json({ message: error.message || 'Unknown Error Occurred', details: error });
 		}
 	};
 
@@ -78,13 +96,11 @@ class PostController {
 	 */
 	static getOne = async (req: Request, res: Response) => {
 		try {
-			const body: { id: string } = req.body;
-
-			DatabaseOperations.getOne(PostModel, body, res);
+			return DatabaseOperations.getOne(PostModel, { _id: req.params.id }, res);
 		} catch (error: any) {
 			return res
 				.status(httpCode.INTERNAL_SERVER_ERROR)
-				.json({ error: { message: error.message || 'Unable to verify JWT Token', details: error } });
+				.json({ message: error.message || 'Unable to verify JWT Token', details: error });
 		}
 	};
 
@@ -96,13 +112,13 @@ class PostController {
 	 */
 	static update = async (req: Request, res: Response) => {
 		try {
-			const body: { id: string; post: Post } = { ...req.body };
+			const body: Post = { ...req.body };
 
-			DatabaseOperations.update(PostModel, { id: body.id }, { ...body.post }, res);
+			return DatabaseOperations.update(PostModel, { _id: req.params.id }, body, res);
 		} catch (error: any) {
 			return res
 				.status(httpCode.INTERNAL_SERVER_ERROR)
-				.json({ error: { message: error.message || 'Unable to verify JWT Token', details: error } });
+				.json({ message: error.message || 'Unable to verify JWT Token', details: error });
 		}
 	};
 }

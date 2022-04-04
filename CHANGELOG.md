@@ -161,5 +161,22 @@ All notable changes to this project will be documented in this file
 
 -   Refresh fresh token is removed. Using Redis cache and both access and refresh token saved after creating.
 
+## [0.6.0] - 2022-04-05
 
+### Added
 
+-   Auth/User, Post end points are fully functional. **DON'T MAKE CHANGES IN AUTH/USERS CONTROLLERS**
+
+### Changed
+
+-   authorize middleware adds id in request body to assign user id while creating posts, comments and votes.
+-   error messages
+-   Other few minor changes
+
+### Removed
+
+-   Unused files and code blocks are removed.
+
+### Fixes
+
+-   No fixes
