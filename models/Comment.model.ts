@@ -6,7 +6,7 @@ const CommentSchema: Schema<Comment> = new Schema({
 	userRef: { type: String, required: true, ref: 'User' },
 	postRef: { type: String, required: true, ref: 'Post' },
 	description: { type: String, required: true },
-	timestamp: { type: Schema.Types.Date, required: true },
+	timestamp: { type: Schema.Types.Number, required: true },
 });
 
 export default model('Comment', CommentSchema);
