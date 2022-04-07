@@ -1,5 +1,4 @@
 import { Request, Response } from 'express';
-import { Schema } from 'mongoose';
 
 import httpCode from '../utils/httpcodes';
 import Post from '../interfaces/Post.interface';
@@ -65,22 +64,12 @@ class PostController {
 				tagTwo: req.body.tagTwo,
 				tagThree: req.body.tagThree,
 			};
-			PostModel.find({ type: body.type })
-				.find({
-					$or: [
-						{ tags: { $in: body.tagOne } },
-						{ tags: { $in: body.tagTwo } },
-						{ tags: { $in: body.tagThree } },
-					],
-				})
-				.then((result) => {
-					return res.status(httpCode.OK).json(result);
-				})
-				.catch((error) => {
-					return res
-						.status(httpCode.INTERNAL_SERVER_ERROR)
-						.json({ message: error.message || 'Unable to get feed', details: error });
-				});
+
+			const result = await PostModel.find({ type: body.type }).find({
+				$or: [{ tags: { $in: body.tagOne } }, { tags: { $in: body.tagTwo } }, { tags: { $in: body.tagThree } }],
+			});
+
+			return res.status(httpCode.OK).json(result);
 		} catch (error: any) {
 			return res
 				.status(httpCode.INTERNAL_SERVER_ERROR)

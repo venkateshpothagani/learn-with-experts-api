@@ -9,31 +9,30 @@ class ExpertController {
 	 *
 	 * @param req express.Request
 	 * @param res express.Response
-	 * @description Successful response contains feed based on user interested tech, institution,
-	 * language, description and gender fields
+	 * @description Successful response contains feed based on client interested tech
+	 * Reponse consists only few fields `username fullName mail interestedTech expertizedTech languages`
 	 */
 	static getFeed = async (req: Request, res: Response) => {
 		try {
-			const body: { interestedTech: Array<string> } = { ...req.body };
+			const body: { tagOne: string; tagTwo: string; tagThree: string } = { ...req.body };
 
-			// const data = await TechnologyModel.find({
-			// 	isInterested: true,
-			// 	$or: [{ name: { $in: [...body.interestedTech] } }],
-			// });
-
-			//name: {$in: [...interestedTech]}
-			// console.log(data);
-			// return res.json(data);
-			// get free
-			// UserModel.find({ ...body })
-			// 	.then((result) => {
-			// 		return res.status(httpCode.ACCEPTED).json(result);
-			// 	})
-			// 	.catch((error) => {
-			// 		return res.status(httpCode.BAD_REQUEST).json(error);
-			// 	});
-		} catch (error) {
-			return res.status(httpCode.INTERNAL_SERVER_ERROR).json(error);
+			// Filter users based on their expertizedTech
+			// Response contains only few fields
+			const result = await UserModel.find(
+				{
+					$or: [
+						{ expertizedTech: { $in: body.tagOne } },
+						{ expertizedTech: { $in: body.tagTwo } },
+						{ expertizedTech: { $in: body.tagThree } },
+					],
+				},
+				'username fullName mail interestedTech expertizedTech languages'
+			);
+			return res.status(httpCode.OK).json(result);
+		} catch (error: any) {
+			return res
+				.status(httpCode.INTERNAL_SERVER_ERROR)
+				.json({ message: error.message || 'Unknown Error Occurred', details: error });
 		}
 	};
 
@@ -41,15 +40,16 @@ class ExpertController {
 	 *
 	 * @param req express.Request
 	 * @param res express.Response
-	 * @description
+	 * @description Successful response contains user/expert details
 	 */
 	static getOne = (req: Request, res: Response) => {
 		try {
 			const id: string = req.params.id;
-
-			DatabaseOperations.getOne(UserModel, { id }, res);
-		} catch (error) {
-			return res.status(httpCode.INTERNAL_SERVER_ERROR).json(error);
+			return DatabaseOperations.getOne(UserModel, { id }, res);
+		} catch (error: any) {
+			return res
+				.status(httpCode.INTERNAL_SERVER_ERROR)
+				.json({ message: error.message || 'Unknown Error Occurred', details: error });
 		}
 	};
 }
