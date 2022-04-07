@@ -1,5 +1,4 @@
 import { Response, Request } from 'express';
-import { Schema } from 'mongoose';
 
 import User from '../interfaces/User.interface';
 import httpCode from '../utils/httpcodes';
@@ -18,22 +17,7 @@ class Authenticator {
 	 */
 	static signup = async (req: Request, res: Response) => {
 		try {
-			const body: User = {
-				username: req.body.username,
-				password: req.body.password,
-				confirmPassword: req.body.confirmPassword,
-				interestedTech: req.body.interestedTech,
-				expertizedTech: req.body.expertizedTech,
-				languages: req.body.languages,
-				timestamp: Date.now(),
-				fullName: req.body.fullName || null,
-				mail: req.body.mail || null,
-				description: req.body.description || null,
-				institution: req.body.institution || null,
-				gender: req.body.gender || null,
-				phone: req.body.phone || null,
-				address: req.body.address || null,
-			};
+			const body: User = { ...req.body, timestamp: Date.now() };
 
 			const pattern = new RegExp(config.auth.PASSWORD_PATTERN);
 
@@ -80,49 +64,80 @@ class Authenticator {
 			const body: { username: string; password: string } = req.body;
 
 			// Find user by username
-			UserModel.findOne({ username: body.username }).then((response) => {
-				if (!response) {
-					return res.status(httpCode.NOT_FOUND).json({ message: 'User not found', details: null });
-				} else {
-					// Compare passwords
-					bycrypt.comparePassword(body.password, response.password).then(async (result) => {
-						if (!result) {
-							return res.status(httpCode.UNAUTHORIZED).json({ message: 'Wrong password', details: null });
-						} else {
-							const accessToken = jwt.getAccessToken(body.username, String(response._id));
-							const refreshToken = jwt.getRefreshToken(body.username, String(response._id));
+			const response = await UserModel.findOne({ username: body.username });
 
-							const accessTokenKey = config.db.REDIS_AT_PREFIX + response.username;
-							const refreshTokenKey = config.db.REDIS_RT_PREFIX + response.username;
+			// Return if not found
+			if (!response) return res.status(httpCode.NOT_FOUND).json({ message: 'User not found', details: null });
 
-							// Save access token in redis with expiration time or overrides existing key value
-							redis
-								.setex(accessTokenKey, parseInt(config.auth.JWT_EXPIRES_IN), accessToken)
-								.catch((error) => {
-									return res.status(httpCode.INTERNAL_SERVER_ERROR).json({
-										message: error.message || 'Unknown error occurred while saving JWT Token',
-										details: error,
-									});
-								});
+			// Compare passwords
+			const result = await bycrypt.comparePassword(body.password, response.password);
 
-							// Save refresh token in redis with expiration time or overrides existing key value
-							redis
-								.setex(refreshTokenKey, parseInt(config.auth.JWT_REFRESH_EXPIRES_IN), refreshToken)
-								.catch((error) => {
-									return res.status(httpCode.INTERNAL_SERVER_ERROR).json({
-										message: error.message || 'Unknown error occurred while saving JWT Token',
-										details: error,
-									});
-								});
+			// Returns 401 response if password mismatches
+			if (!result) return res.status(httpCode.UNAUTHORIZED).json({ message: 'Wrong password', details: null });
 
-							return res.status(httpCode.OK).json({
-								message: 'User logged in successfully',
-								data: { accessToken, refreshToken, id: response._id, username: response.username },
-							});
-						}
-					});
-				}
+			// Creates access and refresh tokens
+			const accessToken = jwt.getAccessToken(body.username, String(response._id));
+			const refreshToken = jwt.getRefreshToken(body.username, String(response._id));
+
+			// Adds prefix to make key unique
+			const accessKey = config.db.REDIS_AT_PREFIX + response.username;
+			const refreshKey = config.db.REDIS_RT_PREFIX + response.username;
+
+			// Save Redis DB Cache
+			await redis.setex(accessKey, parseInt(config.auth.JWT_EXPIRES_IN), accessToken);
+			await redis.setex(refreshKey, parseInt(config.auth.JWT_REFRESH_EXPIRES_IN), refreshToken);
+
+			return res.status(httpCode.OK).json({
+				message: 'User logged in successfully',
+				data: { accessToken, refreshToken, id: response._id, username: response.username },
 			});
+
+			// // Find user by username
+			// UserModel.findOne({ username: body.username }).then((response) => {
+			// 	if (!response) {
+			// 		return res.status(httpCode.NOT_FOUND).json({ message: 'User not found', details: null });
+			// 	} else {
+			// 		// Compare passwords
+			// 		bycrypt.comparePassword(body.password, response.password).then(async (result) => {
+			// 			if (!result) {
+			// 				return res.status(httpCode.UNAUTHORIZED).json({ message: 'Wrong password', details: null });
+			// 			} else {
+			// 				const accessToken = jwt.getAccessToken(body.username, String(response._id));
+			// 				const refreshToken = jwt.getRefreshToken(body.username, String(response._id));
+
+			// 				const accessKey = config.db.REDIS_AT_PREFIX + response.username;
+			// 				const refreshKey = config.db.REDIS_RT_PREFIX + response.username;
+
+			// 				// Save access token in redis with expiration time or overrides existing key value
+			// 				await redis.setex(accessKey, parseInt(config.auth.JWT_EXPIRES_IN), accessToken);
+			// 				// redis
+			// 				// 	.setex(accessKey, parseInt(config.auth.JWT_EXPIRES_IN), accessToken)
+			// 				// 	.catch((error) => {
+			// 				// 		return res.status(httpCode.INTERNAL_SERVER_ERROR).json({
+			// 				// 			message: error.message || 'Unknown error occurred while saving JWT Token',
+			// 				// 			details: error,
+			// 				// 		});
+			// 				// 	});
+
+			// 				// Save refresh token in redis with expiration time or overrides existing key value
+			// 				await redis.setex(refreshKey, parseInt(config.auth.JWT_REFRESH_EXPIRES_IN), refreshToken);
+			// 				// redis
+			// 				// 	.setex(refreshKey, parseInt(config.auth.JWT_REFRESH_EXPIRES_IN), refreshToken)
+			// 				// 	.catch((error) => {
+			// 				// 		return res.status(httpCode.INTERNAL_SERVER_ERROR).json({
+			// 				// 			message: error.message || 'Unknown error occurred while saving JWT Token',
+			// 				// 			details: error,
+			// 				// 		});
+			// 				// 	});
+
+			// 				return res.status(httpCode.OK).json({
+			// 					message: 'User logged in successfully',
+			// 					data: { accessToken, refreshToken, id: response._id, username: response.username },
+			// 				});
+			// 			}
+			// 		});
+			// 	}
+			// });
 		} catch (error: any) {
 			return res.status(httpCode.INTERNAL_SERVER_ERROR).json({
 				message: error.message || 'Unknown Error Occurred',
@@ -187,37 +202,52 @@ class Authenticator {
 		try {
 			const body: { refreshToken: string } = req.body;
 
-			if (!body.refreshToken) {
+			if (!body.refreshToken)
 				return res.status(httpCode.FORBIDDEN).json({ message: 'No refresh token', details: null });
-			}
 
-			jwt.verifyToken(body.refreshToken, config.auth.JWT_REFRESH_SECRET_KEY)
-				.then(async (result) => {
-					const accessToken = jwt.getAccessToken(result.username, String(result.id));
+			const result = await jwt.verifyToken(body.refreshToken, config.auth.JWT_REFRESH_SECRET_KEY);
 
-					const accessTokenKey = config.db.REDIS_AT_PREFIX + result.username;
-					const refreshTokenKey = config.db.REDIS_RT_PREFIX + result.username;
+			const accessToken = jwt.getAccessToken(result.username, String(result.id));
 
-					const refreshToken = await redis.get(refreshTokenKey);
+			const accessKey = config.db.REDIS_AT_PREFIX + result.username;
+			const refreshKey = config.db.REDIS_RT_PREFIX + result.username;
 
-					if (refreshToken !== body.refreshToken)
-						return res.status(httpCode.FORBIDDEN).json({ message: 'Invalid user token', details: null });
+			const refreshToken = await redis.get(refreshKey);
 
-					redis.setex(accessTokenKey, parseInt(config.auth.JWT_EXPIRES_IN), accessToken).catch((error) => {
-						return res.status(httpCode.INTERNAL_SERVER_ERROR).json({
-							message: error.message || 'Unknown error occurred while saving JWT Token',
-							details: error,
-						});
-					});
+			if (refreshToken !== body.refreshToken)
+				return res.status(httpCode.FORBIDDEN).json({ message: 'Invalid user token', details: null });
 
-					return res.status(httpCode.OK).json({ accessToken });
-				})
-				.catch((error) => {
-					return res.status(httpCode.INTERNAL_SERVER_ERROR).json({
-						message: error.message || 'Unable to verify JWT Token',
-						details: error,
-					});
-				});
+			await redis.setex(accessKey, parseInt(config.auth.JWT_EXPIRES_IN), accessToken);
+
+			return res.status(httpCode.OK).json({ accessToken });
+
+			// jwt.verifyToken(body.refreshToken, config.auth.JWT_REFRESH_SECRET_KEY)
+			// 	.then(async (result) => {
+			// 		const accessToken = jwt.getAccessToken(result.username, String(result.id));
+
+			// 		const accessKey = config.db.REDIS_AT_PREFIX + result.username;
+			// 		const refreshKey = config.db.REDIS_RT_PREFIX + result.username;
+
+			// 		const refreshToken = await redis.get(refreshKey);
+
+			// 		if (refreshToken !== body.refreshToken)
+			// 			return res.status(httpCode.FORBIDDEN).json({ message: 'Invalid user token', details: null });
+
+			// 		redis.setex(accessKey, parseInt(config.auth.JWT_EXPIRES_IN), accessToken).catch((error) => {
+			// 			return res.status(httpCode.INTERNAL_SERVER_ERROR).json({
+			// 				message: error.message || 'Unknown error occurred while saving JWT Token',
+			// 				details: error,
+			// 			});
+			// 		});
+
+			// 		return res.status(httpCode.OK).json({ accessToken });
+			// 	})
+			// 	.catch((error) => {
+			// 		return res.status(httpCode.INTERNAL_SERVER_ERROR).json({
+			// 			message: error.message || 'Unable to verify JWT Token',
+			// 			details: error,
+			// 		});
+			// 	});
 		} catch (error: any) {
 			return res.status(httpCode.INTERNAL_SERVER_ERROR).json({
 				message: error.message || 'Unknown Error Occurred',
@@ -236,22 +266,25 @@ class Authenticator {
 		try {
 			const body: { username: string } = req.body;
 
-			const accessTokenKey = config.db.REDIS_AT_PREFIX + body.username;
-			const refreshTokenKey = config.db.REDIS_RT_PREFIX + body.username;
+			const accessKey = config.db.REDIS_AT_PREFIX + body.username;
+			const refreshKey = config.db.REDIS_RT_PREFIX + body.username;
 
-			redis.del(accessTokenKey).catch((error) => {
-				return res
-					.status(httpCode.INTERNAL_SERVER_ERROR)
-					.json({ message: error.message || 'Logout failed due to DB error', details: error });
-			});
+			await redis.del(accessKey);
+			await redis.del(refreshKey);
 
-			redis.del(refreshTokenKey).catch((error) => {
-				return res
-					.status(httpCode.INTERNAL_SERVER_ERROR)
-					.json({ message: error.message || 'Logout failed due to DB error', details: error });
-			});
+			// redis.del(accessKey).catch((error) => {
+			// 	return res
+			// 		.status(httpCode.INTERNAL_SERVER_ERROR)
+			// 		.json({ message: error.message || 'Logout failed due to DB error', details: error });
+			// });
 
-			return res.status(httpCode.OK).json({ message: 'Successfully logout' });
+			// redis.del(refreshKey).catch((error) => {
+			// 	return res
+			// 		.status(httpCode.INTERNAL_SERVER_ERROR)
+			// 		.json({ message: error.message || 'Logout failed due to DB error', details: error });
+			// });
+
+			return res.status(httpCode.OK).json({ message: 'Successfully logout', data: null });
 		} catch (error: any) {
 			return res.status(httpCode.INTERNAL_SERVER_ERROR).json({
 				message: error.message || 'Unknown Error Occurred',

@@ -1,6 +1,5 @@
-import jwt, { JwtPayload } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 import config from '../config/app.config';
-import { CustomJwtPayload } from '../interfaces/JWTInterfaces';
 
 class JWT {
 	/**

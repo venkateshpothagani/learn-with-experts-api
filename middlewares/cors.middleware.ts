@@ -9,7 +9,6 @@ const options: cors.CorsOptions = {
     "X-Access-Token",
   ],
   credentials: true,
-  origin: "API_URL",
   preflightContinue: false,
 };
    

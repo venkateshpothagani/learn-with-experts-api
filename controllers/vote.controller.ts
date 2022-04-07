@@ -12,15 +12,7 @@ class VoteController {
 	 * @param res express.Response
 	 * @description Add or remove votes of a specific comment or post.
 	 */
-	static addVote = (req: Request, res: Response) => {
-		try {
-			const body: Vote = { ...req.body };
-
-			DatabaseOperations.create(VoteModel, body, res);
-		} catch (error) {
-			return res.status(httpCode.INTERNAL_SERVER_ERROR).json(error);
-		}
-	};
+	static updateVote = (req: Request, res: Response) => {};
 }
 
 export default VoteController;

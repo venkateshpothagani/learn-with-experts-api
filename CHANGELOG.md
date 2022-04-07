@@ -180,3 +180,17 @@ All notable changes to this project will be documented in this file
 ### Fixes
 
 -   No fixes
+
+## [0.7.0] - 2022-04-07
+
+### Added
+
+-   Expert end points are completed
+
+### Changed
+
+-   `.then` and `.catch` are replaced with `async-await`
+
+### Removed
+
+-   Not used files and un-used import are moved

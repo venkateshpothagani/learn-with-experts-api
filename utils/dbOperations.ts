@@ -20,17 +20,10 @@ class DatabaseOperations {
 		model: Model<Post> | Model<Comment> | Model<Post> | Model<Vote> | Model<User>,
 		data: Comment | User | Post | Vote,
 		res: Response
-	) =>
-		model
-			.create(data)
-			.then((result) => {
-				return res.status(httpCode.CREATED).json({ message: 'Document saved successfully', data: result });
-			})
-			.catch((error) => {
-				return res
-					.status(httpCode.BAD_REQUEST)
-					.json({ message: error.message || 'Unable to create document.', details: error });
-			});
+	) => {
+		const result = await model.create(data);
+		return res.status(httpCode.CREATED).json({ message: 'Document saved successfully', data: result });
+	};
 
 	/**
 	 *
@@ -44,17 +37,20 @@ class DatabaseOperations {
 		model: Model<Post> | Model<Comment> | Model<Post> | Model<Comment> | Model<User>,
 		filter: any,
 		res: Response
-	) =>
-		model
-			.deleteOne(filter)
-			.then((result) => {
-				return res.status(httpCode.OK).json({ message: 'Document deleted successfully', data: result });
-			})
-			.catch((error) => {
-				return res
-					.status(httpCode.BAD_REQUEST)
-					.json({ message: error.message || 'Unable to remove document.', details: error });
-			});
+	) => {
+		const result = await model.deleteOne(filter);
+		return res.status(httpCode.OK).json({ message: 'Document deleted successfully', data: result });
+		// model
+		// 	.deleteOne(filter)
+		// 	.then((result) => {
+		// 		return res.status(httpCode.OK).json({ message: 'Document deleted successfully', data: result });
+		// 	})
+		// 	.catch((error) => {
+		// 		return res
+		// 			.status(httpCode.BAD_REQUEST)
+		// 			.json({ message: error.message || 'Unable to remove document.', details: error });
+		// 	});
+	};
 
 	/**
 	 *
@@ -68,17 +64,20 @@ class DatabaseOperations {
 		model: Model<Post> | Model<Comment> | Model<Post> | Model<Comment> | Model<User>,
 		filter: Object,
 		res: Response
-	) =>
-		model
-			.findOne(filter)
-			.then((result) => {
-				return res.status(httpCode.OK).json({ message: 'Document fetched successfully', data: result });
-			})
-			.catch((error) => {
-				return res
-					.status(httpCode.BAD_REQUEST)
-					.json({ message: error.message || 'Unable to get document.', details: error });
-			});
+	) => {
+		const result = await model.findOne(filter);
+		return res.status(httpCode.OK).json({ message: 'Document fetched successfully', data: result });
+		// model
+		// 	.findOne(filter)
+		// 	.then((result) => {
+		// 		return res.status(httpCode.OK).json({ message: 'Document fetched successfully', data: result });
+		// 	})
+		// 	.catch((error) => {
+		// 		return res
+		// 			.status(httpCode.BAD_REQUEST)
+		// 			.json({ message: error.message || 'Unable to get document.', details: error });
+		// 	});
+	};
 
 	/**
 	 *
@@ -94,17 +93,20 @@ class DatabaseOperations {
 		filter: Object,
 		data: Comment | User | Post | Vote,
 		res: Response
-	) =>
-		model
-			.updateOne(filter, data)
-			.then((result) => {
-				return res.status(httpCode.OK).json({ message: 'Document updated successfully', data: result });
-			})
-			.catch((error) => {
-				return res
-					.status(httpCode.BAD_REQUEST)
-					.json({ error: { message: error.message || 'Unable to update document.', details: error } });
-			});
+	) => {
+		const result = await model.updateOne(filter, data);
+		return res.status(httpCode.OK).json({ message: 'Document updated successfully', data: result });
+		// model
+		// 	.updateOne(filter, data)
+		// 	.then((result) => {
+		// 		return res.status(httpCode.OK).json({ message: 'Document updated successfully', data: result });
+		// 	})
+		// 	.catch((error) => {
+		// 		return res
+		// 			.status(httpCode.BAD_REQUEST)
+		// 			.json({ error: { message: error.message || 'Unable to update document.', details: error } });
+		// 	});
+	};
 }
 
 export default DatabaseOperations;

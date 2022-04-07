@@ -26,40 +26,56 @@ const authorize = async (req: Request, res: Response, next: NextFunction) => {
 				.status(httpCode.UNAUTHORIZED)
 				.json({ message: 'Access Token required to validate client', details: null });
 
-		//Validate token
-		jwt.verifyToken(token, config.auth.JWT_SECRET_KEY)
-			.then(async (result) => {
-				if (!result)
-					return res
-						.status(httpCode.FORBIDDEN)
-						.json({ message: 'User token verification failed', details: result });
+		const result = await jwt.verifyToken(token, config.auth.JWT_SECRET_KEY);
 
-				const key = config.db.REDIS_AT_PREFIX + result.username;
+		if (!result.username)
+			return res.status(httpCode.FORBIDDEN).json({ message: 'User token verification failed', details: result });
 
-				redis
-					.get(key)
-					.then((value) => {
-						if (!value || value !== token)
-							return res
-								.status(httpCode.FORBIDDEN)
-								.json({ message: 'User token verification failed', details: value });
-						req.body.username = result.username;
-						req.body.id = result.id;
-						next();
-					})
-					.catch((error) => {
-						return res.status(httpCode.INTERNAL_SERVER_ERROR).json({
-							message: error.message || 'Error occurred while validating user token',
-							details: error,
-						});
-					});
-			})
-			.catch((error) => {
-				return res.status(httpCode.FORBIDDEN).json({
-					message: error.message || 'Invalid user token',
-					details: error,
-				});
-			});
+		const key = config.db.REDIS_AT_PREFIX + result.username;
+		const value = await redis.get(key);
+
+		if (!value || value !== token)
+			return res.status(httpCode.FORBIDDEN).json({ message: 'User token verification failed', details: value });
+
+		req.body.username = result.username;
+		req.body.id = result.id;
+
+		next();
+
+		// Validate token
+		// jwt.verifyToken(token, config.auth.JWT_SECRET_KEY)
+		// 	.then(async (result) => {
+		// if (!result)
+		// 	return res
+		// 		.status(httpCode.FORBIDDEN)
+		// 		.json({ message: 'User token verification failed', details: result });
+
+		// 	const key = config.db.REDIS_AT_PREFIX + result.username;
+
+		// 	redis
+		// 		.get(key)
+		// 		.then((value) => {
+		// 			if (!value || value !== token)
+		// 				return res
+		// 					.status(httpCode.FORBIDDEN)
+		// 					.json({ message: 'User token verification failed', details: value });
+		// 			req.body.username = result.username;
+		// 			req.body.id = result.id;
+		// 			next();
+		// 		})
+		// 		.catch((error) => {
+		// 			return res.status(httpCode.INTERNAL_SERVER_ERROR).json({
+		// 				message: error.message || 'Error occurred while validating user token',
+		// 				details: error,
+		// 			});
+		// 		});
+		// })
+		// .catch((error) => {
+		// 	return res.status(httpCode.FORBIDDEN).json({
+		// 		message: error.message || 'Invalid user token',
+		// 		details: error,
+		// 	});
+		// });
 	} catch (error: any) {
 		return res.status(httpCode.INTERNAL_SERVER_ERROR).json({
 			message: error.message || 'Unknown Error Occurred',
