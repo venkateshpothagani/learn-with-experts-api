@@ -17,7 +17,7 @@ class DbConfig {
 }
 
 class AuthConfig {
-	static readonly ENCRYPTION_ROUNDS = process.env.ENCRYPTION_ROUNDS || 10;
+	static readonly ENCRYPTION_ROUNDS = process.env.ENCRYPTION_ROUNDS || '10';
 	static readonly JWT_SECRET_KEY = process.env.JWT_SECRET_KEY || '7de19a40ec106d591';
 	static readonly JWT_REFRESH_SECRET_KEY = process.env.JWT_REFRESH_SECRET_KEY || '9662c0d1390c99064534';
 	static readonly JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '86400000'; //1 Day
