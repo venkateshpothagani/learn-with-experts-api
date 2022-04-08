@@ -11,7 +11,7 @@ class Bycrypt {
 	 *
 	 */
 	static async encryptPassword(password: string): Promise<string> {
-		return bycrypt.hash(password, config.auth.ENCRYPTION_ROUNDS);
+		return bycrypt.hash(password, parseInt(config.auth.ENCRYPTION_ROUNDS));
 	}
 
 	/**
