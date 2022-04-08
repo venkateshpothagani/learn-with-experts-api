@@ -44,6 +44,7 @@ class Authenticator {
 
 			// Save new user in database
 			const result = await UserModel.create(user);
+			result.password = 'Password securely saved in server.';
 
 			return res.status(httpCode.CREATED).json({ message: 'User data saved successfully', data: result });
 		} catch (error: any) {

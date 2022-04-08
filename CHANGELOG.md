@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file
 
+## [Released]
+
+---
+
 ## [Unreleased]
 
 ## [0.1.0] - 2022-03-16
@@ -194,3 +198,9 @@ All notable changes to this project will be documented in this file
 ### Removed
 
 -   Not used files and un-used import are moved
+
+## [0.8.0] - 2022-04-09
+
+### Added
+
+-   Some info about API added in ReadME file

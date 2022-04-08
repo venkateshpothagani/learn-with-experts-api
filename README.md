@@ -1,10 +1,8 @@
-# API For Learn-With-Experts
+# **API For Learn-With-Experts**
 
-<details>
+## <u>Generic Responses</u>
 
-<summary>  <b>Generic Responses</b> (click here to expand)</summary>
-
-### Error response
+### 1. Error response
 
 ```js
 {
@@ -15,7 +13,7 @@
 }
 ```
 
-### Success reponse
+### 2. Success reponse
 
 ```js
 {
@@ -26,85 +24,299 @@
 }
 ```
 
-</details>
+ <br/>
+ <br/>
 
-<details>
+> 🔒 - Required Authorization
+>
+> Implemented using JWT Token
+>
+> Token required in Authorization Header `Bearer Token`
 
-<summary><b>Auth and Auth end points</b> (click here to expand)</summary>
+ <br/>
+ <br/>
 
-### Register/Signup
+## <u>Auth and Auth end points</u>
 
-#### Required fields
+### 1. Register/Signup
 
-```ts
-User {
+| METHOD | END POINT         |
+| ------ | ----------------- |
+| `POST` | `api/user/signup` |
+
+```js
+{
 	username: string;
 	password: string;
 	confirmPassword: string;
 	interestedTech: Array<string>;
 	expertizedTech: Array<string>;
 	languages: Array<string>;
-	fullName?: string;
-	mail?: string;
-	description?: string;
-	institution?: string;
-	gender?: string;
-	phone?: string;
-	address?: string;
+	fullName: string; // Optional
+	mail: string; // Optional
+	description: string; // Optional
+	institution: string; // Optional
+	gender: string; // Optional
+	phone: string; // Optional
+	address: string; // Optional
 }
 ```
 
-#### Request
+<br/>
 
-#### Response
+### 2. Sign-in
 
-```json
+| METHOD | END POINT        |
+| ------ | ---------------- |
+| `POST` | `api/user/login` |
+
+```js
 {
-	"message": "User data saved successfully",
-	"data": {
-		"username": "iamnewuser#001",
-		"password": "$2b$10$aBSPD6AloqwlKSkWuXJpmODoo1tyPbSJ1JLFudg3PR26eOFY5p3QG",
-		"interestedTech": ["A", "B", "C"],
-		"expertizedTech": ["D", "E", "F"],
-		"languages": ["English", "Telugu"],
-		"timestamp": 1649258016572,
-		"fullName": "First User",
-		"mail": "userfirst@mail.org",
-		"description": "Nothing",
-		"institution": "Good People College for Engineering and Technology",
-		"gender": "Female",
-		"phone": "+91 9874561230",
-		"address": "Super, Secert, Location, 123456",
-		"_id": "624dae2059f743360c6b1823",
-		"__v": 0
+	username: string;
+	password: string;
+}
+```
+
+<br/>
+
+### 3. Refresh Token
+
+| METHOD | END POINT          |
+| ------ | ------------------ |
+| `POST` | `api/user/refresh` |
+
+```js
+{
+	refreshToken: string;
+}
+```
+
+<br/>
+
+### 4. Logout 🔒
+
+| METHOD | END POINT         |
+| ------ | ----------------- |
+| `POST` | `api/user/logout` |
+
+```js
+{
+	refreshToken: string;
+}
+```
+
+<br/>
+
+### 5. Update details 🔒
+
+| METHOD | END POINT         |
+| ------ | ----------------- |
+| `PUT`  | `api/user/update` |
+
+```js
+// All fields in data object are optional
+{
+username: string,
+data: {
+	username: string;
+	interestedTech: Array<string>;
+	expertizedTech: Array<string>;
+	languages: Array<string>;
+	fullName: string;
+	mail: string;
+	description: string;
+	institution: string;
+	gender: string;
+	phone: string;
+	address: string;
 	}
 }
 ```
 
-### Sign-in
+<br/>
 
-### Refresh Token
+### 6. Delete user 🔒
 
-### Logout
+| METHOD   | END POINT         |
+| -------- | ----------------- |
+| `DELETE` | `api/user/remove` |
 
-</details>
+```js
+{
+	username: string;
+}
+```
 
-<details>
+<br/>
+<br/>
 
-<summary><b>User details end points</b> (click here to expand)</summary>
+## <u>User/Experts details end points</u>
 
-### Get specific user details
+### 1. Get specific user details 🔒
 
-### Get all users / feed
+| METHOD | END POINT        |
+| ------ | ---------------- |
+| `GET`  | `api/expert/:id` |
 
-</details>
-<details>
+_No data required in body_
 
-<summary><b>Post details end points</b> (click here to expand)</summary>
+<br/>
 
-</details>
-<details>
+### 2. Get all users
 
-<summary><b>Comment details end points</b> (click here to expand)</summary>
+| METHOD | END POINT    |
+| ------ | ------------ |
+| `GET`  | `api/expert` |
 
-</details>
+```js
+{
+	tagOne: string;
+	tagTwo: string;
+	tagThree: string;
+}
+```
+
+<br/>
+
+## <u>Post details end points</u>
+
+### 1. Create a post 🔒
+
+| METHOD | END POINT  |
+| ------ | ---------- |
+| `POST` | `api/post` |
+
+```js
+{
+	description: string;
+    tags: Array<string>;
+}
+```
+
+<br/>
+
+### 2. Get all posts 🔒
+
+| METHOD | END POINT  |
+| ------ | ---------- |
+| `GET`  | `api/post` |
+
+```js
+{
+    tagOne: string,
+    tagTwo: string, // Optional
+    tagThree: string, // Optional
+    type: "POST"|"QUESTION"
+}
+```
+
+<br/>
+
+### 3. Get a post 🔒
+
+| METHOD | END POINT      |
+| ------ | -------------- |
+| `GET`  | `api/post/:id` |
+
+_No data required in body_
+
+<br/>
+
+### 4. Update a post. 🔒
+
+| METHOD | END POINT      |
+| ------ | -------------- |
+| `PUT`  | `api/post/:id` |
+
+```js
+{
+	description: string; // Optional
+    tags: Array<string>; // Optional
+}
+```
+
+<br/>
+<br/>
+
+### 5. Delete a post. 🔒
+
+| METHOD | END POINT      |
+| ------ | -------------- |
+| `PUT`  | `api/post/:id` |
+
+_No data required in body_
+
+<br/>
+<br/>
+
+## <u>Comment details end points</u>
+
+### 1. Create a comment. 🔒
+
+| METHOD | END POINT     |
+| ------ | ------------- |
+| `POST` | `api/comment` |
+
+```js
+{
+	userRef: string; // ObjectId
+	postRef: string; // ObjectId
+	description: string;
+}
+```
+
+<br/>
+
+### 2. Get a comment 🔒
+
+| METHOD | END POINT         |
+| ------ | ----------------- |
+| `GET`  | `api/comment/:id` |
+
+_No required in body_
+
+<br/>
+
+### 3. Get all comments
+
+| METHOD | END POINT     |
+| ------ | ------------- |
+| `GET`  | `api/comment` |
+
+```js
+{
+	postRef: string; // ObjectId
+}
+```
+
+<br/>
+
+### 4. Update comment 🔒
+
+| METHOD | END POINT         |
+| ------ | ----------------- |
+| `PUT`  | `api/comment/:id` |
+
+```js
+{
+	userRef: string; // ObjectId
+	postRef: string; // ObjectId
+	description: string;
+}
+```
+
+<br/>
+
+### 5. Delete comment 🔒
+
+| METHOD | END POINT         |
+| ------ | ----------------- |
+| `PUT`  | `api/comment/:id` |
+
+_No required in body_
+
+<br/>
+
+## **Development is still in progress.**
+
+**Lot of thing will change including documentation in ReadME, auth end-points, getting feed and features like voting/likes for posts, etc..**
