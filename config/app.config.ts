@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 class AppConfig {
-	static readonly PORT = process.env.PORT || 3000;
+	static readonly PORT = process.env.PORT || 5000;
 }
 
 class DbConfig {
