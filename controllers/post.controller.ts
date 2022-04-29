@@ -58,15 +58,19 @@ class PostController {
 	 */
 	static getFeed = async (req: Request, res: Response) => {
 		try {
-			const body: { type: string; tagOne: string; tagTwo: string; tagThree: string } = {
-				type: req.body.type,
-				tagOne: req.body.tagOne,
-				tagTwo: req.body.tagTwo,
-				tagThree: req.body.tagThree,
-			};
+			// const body: { type: string; tagOne: string; tagTwo: string; tagThree: string } = {
+			// 	type: req.body.type,
+			// 	tagOne: req.body.tagOne,
+			// 	tagTwo: req.body.tagTwo,
+			// 	tagThree: req.body.tagThree,
+			// };
 
-			const result = await PostModel.find({ type: body.type }).find({
-				$or: [{ tags: { $in: body.tagOne } }, { tags: { $in: body.tagTwo } }, { tags: { $in: body.tagThree } }],
+			// const result = await PostModel.find({ type: body.type }).find({
+			// 	$or: [{ tags: { $in: body.tagOne } }, { tags: { $in: body.tagTwo } }, { tags: { $in: body.tagThree } }],
+			// });
+			const result = await PostModel.find({
+				description: { $exists: true },
+				$expr: { $gt: [{ $strLenCP: '$description' }, 20] },
 			});
 
 			return res.status(httpCode.OK).json(result);

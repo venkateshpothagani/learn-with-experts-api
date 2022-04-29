@@ -8,11 +8,11 @@ enum PostType {
 }
 
 const PostSchema: Schema<Post> = new Schema({
-	userRef: { type: Schema.Types.ObjectId, required: true, ref: 'User' },
-	type: { type: String, required: true, enum: PostType, default: PostType.POST },
-	description: { type: String, required: true },
-	tags: { type: Schema.Types.Array, required: true },
-	timestamp: { type: Schema.Types.Number, required: true },
+	userRef: { type: Schema.Types.ObjectId, ref: 'User' },
+	type: { type: String, enum: PostType, default: PostType.POST },
+	description: { type: String, default: "Server didn't get description from client" },
+	tags: { type: Schema.Types.Array },
+	timestamp: { type: Schema.Types.Number },
 });
 
 export default model('Post', PostSchema);

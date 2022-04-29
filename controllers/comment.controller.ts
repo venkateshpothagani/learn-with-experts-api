@@ -55,9 +55,10 @@ class CommentController {
 	 */
 	static getAllComments = async (req: Request, res: Response) => {
 		try {
-			const body: { postRef: string } = { postRef: req.body.postRef };
+			// const body: { postRef: string } = { postRef: req.body.postRef };
+			const id: string = req.params.id;
 
-			const result = await CommentModel.find({ ...body });
+			const result = await CommentModel.find({ postRef: id });
 
 			return res.status(httpCode.OK).json(result);
 		} catch (error: any) {

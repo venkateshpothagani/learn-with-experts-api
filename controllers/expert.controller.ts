@@ -18,16 +18,18 @@ class ExpertController {
 
 			// Filter users based on their expertizedTech
 			// Response contains only few fields
-			const result = await UserModel.find(
-				{
-					$or: [
-						{ expertizedTech: { $in: body.tagOne } },
-						{ expertizedTech: { $in: body.tagTwo } },
-						{ expertizedTech: { $in: body.tagThree } },
-					],
-				},
-				'username fullName mail interestedTech expertizedTech languages'
-			);
+			// const result = await UserModel.find(
+			// 	{
+			// 		$or: [
+			// 			{ expertizedTech: { $in: body.tagOne } },
+			// 			{ expertizedTech: { $in: body.tagTwo } },
+			// 			{ expertizedTech: { $in: body.tagThree } },
+			// 		],
+			// 	},
+			// 	'username fullName mail interestedTech expertizedTech languages'
+			// );
+
+			const result = await UserModel.find();
 			return res.status(httpCode.OK).json(result);
 		} catch (error: any) {
 			return res
